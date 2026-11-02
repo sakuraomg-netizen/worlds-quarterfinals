@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="八强分析工作台：对阵、逐局BP演算、版本分析与可追溯出处。">
+<title>八强分析工作台 · Worlds 2026</title>
+<style>
+:root{--bg:#0b0f14;--panel:#131a22;--panel2:#18212b;--line:#293440;--muted:#92a1b1;--text:#eef3f7;--lime:#c3ed76;--blue:#78afff;--amber:#f0be73;--radius:16px;--mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth;color-scheme:dark}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;line-height:1.6}button,input,select,textarea{font:inherit}button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.4}a{color:inherit;text-underline-offset:4px}a:hover{color:var(--lime)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--lime);outline-offset:3px}button{color:inherit}svg{display:block}button svg,a svg{width:18px;height:18px;flex-shrink:0}h1,h2,h3,h4,p{margin:0}button{border:0}input,select,textarea{background:#0e151d;color:var(--text);border:1px solid var(--line);border-radius:8px}input,select{padding:8px 10px;min-height:38px}textarea{padding:12px;resize:vertical;line-height:1.7;min-height:90px;width:100%}input[type=range]{padding:0;min-height:24px;accent-color:var(--lime);width:100%;cursor:pointer}input[type=number]{font-family:var(--mono)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.skip{position:fixed;top:-100px;left:20px;z-index:20;background:var(--lime);color:#14200b;padding:8px 12px}.skip:focus{top:10px}
+.sidebar{width:222px;position:fixed;inset:0 auto 0 0;border-right:1px solid var(--line);padding:30px 18px 22px;display:flex;flex-direction:column;background:#0e141b;z-index:10}.brand{display:flex;align-items:center;gap:11px;padding:0 10px 34px}.mark{height:40px;width:40px;display:grid;place-items:center;color:#152015;background:var(--lime);clip-path:polygon(0 0,100% 0,100% 75%,75% 100%,0 100%);font-weight:900;font-size:21px;letter-spacing:-2px}.brand b{display:block;font-size:14px;letter-spacing:.08em}.brand small{color:var(--muted);font-size:10px;letter-spacing:.19em}.nav-label{font-size:10px;letter-spacing:.17em;color:#697d91;padding:0 14px;margin:6px 0 12px}.nav{display:grid;gap:8px}.nav button{background:none;border:1px solid transparent;padding:12px 13px;border-radius:10px;display:flex;align-items:center;gap:12px;text-align:left;color:var(--muted);font-weight:550}.nav button:hover{color:var(--text);background:var(--panel)}.nav button.active{color:var(--lime);background:#202a20;border-color:#354530}.nav .tiny{margin-left:auto;font:10px var(--mono);opacity:.6}.sidebar-bottom{margin-top:auto;padding:20px 12px 0;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}.status-dot{display:inline-block;border-radius:50%;width:6px;height:6px;background:var(--lime);margin-right:7px}.sidebar-bottom p{margin-top:8px;font-size:11px;color:#718195}.layout{margin-left:222px}.topbar{height:76px;padding:0 34px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:15px;background:#0d1219}.breadcrumb{color:var(--muted);font-size:12px;display:flex;gap:13px;align-items:center}.breadcrumb span:last-child{color:var(--text)}.top-actions{display:flex;gap:10px;align-items:center}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);padding:9px 15px;border-radius:9px;font-weight:600;font-size:12px;background:var(--panel2);text-decoration:none;white-space:nowrap;min-height:38px}.btn:hover{background:#24313e}.btn.primary{background:var(--lime);color:#1d2b10;border-color:var(--lime)}.btn.primary:hover{background:#d3f79a}.btn.ghost{background:transparent}.btn.small{padding:6px 10px;font-size:11px;min-height:31px}.btn.danger{color:#f5a29c}.topbar select{font-size:12px;background:transparent}.main{padding:34px;max-width:1600px;margin:auto;min-height:calc(100vh - 76px)}.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:25px}.eyebrow{font:10px var(--mono);letter-spacing:.2em;color:var(--lime);margin-bottom:8px}.page-head h1{font-size:29px;font-weight:650;letter-spacing:-.05em;line-height:1.4}.page-head p{color:var(--muted);font-size:12px;margin-top:8px}.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:30px;padding:5px 10px;font-size:10px;color:var(--muted);white-space:nowrap}.pill.green{color:var(--lime);background:#202a20;border-color:#3a482e}.pill.blue{color:var(--blue);border-color:#304560;background:#142134}.pill.amber{color:var(--amber);border-color:#4b3e2d;background:#251f19}.page-meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding-top:7px}.notice{display:flex;gap:10px;align-items:flex-start;border:1px solid #33412d;border-radius:10px;padding:11px 14px;color:#b8c7aa;background:#151d14;font-size:12px;margin-bottom:21px}.notice svg{width:16px;height:16px;flex-shrink:0;margin-top:2px}.notice.amber{background:#211c15;border-color:#4a3c28;color:#d1b58e}.notice.gray{background:#141b23;border-color:var(--line);color:var(--muted)}.notice a{color:inherit}.matches{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:24px}.match{padding:15px 17px;background:var(--panel);border:1px solid var(--line);border-radius:12px;text-align:left;position:relative;transition:border-color .18s,transform .18s}.match:hover{border-color:#597344;transform:translateY(-2px)}.match.active{background:#18231c;border-color:#819c55;box-shadow:inset 0 2px 0 var(--lime)}.match-top{font:10px var(--mono);letter-spacing:.07em;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-bottom:14px}.match-teams{display:flex;align-items:center;justify-content:space-between;gap:10px}.match-teams strong{font-size:23px;letter-spacing:-.04em;line-height:1.2}.match-teams em{font:10px var(--mono);color:#798b9b;font-style:normal}.match-bottom{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:11px}.match-bottom span{color:#bdc6cf}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px;gap:12px}.section-title h2{font-size:16px;letter-spacing:-.02em}.section-title small{color:var(--muted);font-size:11px}.section-title .link{font-size:11px;color:var(--muted)}.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:23px;min-width:0}.grid-main{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:20px}.stack{display:grid;gap:20px;align-content:start}.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}.section-gap{margin-top:22px}.versus{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;padding:9px 0 23px}.team-identity{display:flex;align-items:center;gap:14px}.team-identity.right{flex-direction:row-reverse;text-align:right}.team-badge{height:57px;width:57px;border:1px solid #4c6040;background:#202b22;color:var(--lime);border-radius:14px;display:grid;place-items:center;font:800 19px var(--mono);letter-spacing:-.09em;flex-shrink:0}.team-badge.b{color:var(--blue);border-color:#3f5676;background:#192638}.team-identity h3{font-size:23px;line-height:1.2}.team-identity p{font-size:11px;color:var(--muted);margin-top:5px}.vs{text-align:center;color:#708194;font:italic 15px var(--mono)}.compare-stats{display:grid;gap:13px;padding-top:21px;border-top:1px solid var(--line)}.stat-line{display:grid;grid-template-columns:80px 1fr 80px;align-items:center;gap:12px}.stat-line .value{font:600 21px var(--mono);color:var(--lime)}.stat-line .value:last-child{text-align:right;color:var(--blue)}.stat-mid{text-align:center;color:var(--muted);font-size:11px}.stat-mid .track{display:flex;gap:4px;margin-top:7px;height:4px}.track i{display:block;background:var(--lime);border-radius:3px;flex:1}.track i:last-child{background:var(--blue)}.hint{font-size:11px;color:var(--muted);margin-top:17px;line-height:1.75}.hint strong{color:#c6d0db;font-weight:500}.mini-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}.mini-kpi{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#101720}.mini-kpi span{font-size:10px;color:var(--muted);display:block}.mini-kpi strong{font:600 18px var(--mono);display:block;margin-top:4px}.fact-line{padding:13px 0;border-bottom:1px solid var(--line);display:flex;gap:11px;font-size:12px;line-height:1.8}.fact-line:last-child{border:0;padding-bottom:0}.fact-line .num{color:var(--lime);font:11px var(--mono);padding-top:4px}.story-note{font-size:11px;color:var(--muted);margin-top:13px}.history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;font-size:13px}.history-head span{font:11px var(--mono);color:var(--muted)}.history-row{display:grid;grid-template-columns:31px 1fr auto 31px;gap:10px;align-items:center;border-top:1px solid var(--line);padding:11px 0;font-size:12px}.round{font:10px var(--mono);color:var(--muted)}.format{font:9px var(--mono);color:var(--muted);margin-left:7px}.score{font:600 12px var(--mono)}.result{font:10px var(--mono);text-align:center;border-radius:4px;color:var(--lime);background:#243222;padding:2px 0}.result.loss{color:#e5b8a7;background:#352923}.common{display:grid;grid-template-columns:1fr auto 1fr;padding:11px 0;border-bottom:1px solid var(--line);font-size:12px;gap:18px}.common:last-child{border:0}.common>span:nth-child(2){color:var(--muted)}.common>span:last-child{text-align:right}.panel-footer{display:flex;gap:10px;align-items:center;justify-content:space-between;padding-top:18px;margin-top:18px;border-top:1px solid var(--line)}.panel-footer span{font-size:11px;color:var(--muted)}.empty{padding:35px 15px;text-align:center;color:var(--muted);font-size:12px;line-height:1.9}.segmented{display:flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:9px;background:#0d141d}.segmented button{padding:7px 13px;background:transparent;border-radius:6px;font-size:12px;color:var(--muted);flex:1;white-space:nowrap}.segmented button.active{background:#2b3b2b;color:var(--lime)}.tabs-inline{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.chip{font-size:11px;padding:6px 12px;background:transparent;border:1px solid var(--line);border-radius:7px;color:var(--muted)}.chip.active{color:var(--lime);border-color:#5b7341;background:#202a20}.patch-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.patch-card{padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.patch-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px}.patch-name{display:flex;align-items:center;gap:9px}.patch-name h3{font-size:15px}.role-icon{width:32px;height:32px;display:grid;place-items:center;font-size:12px;background:#202d39;border-radius:9px;color:var(--blue)}.patch-fact{font-size:12px;color:#c4ced8;line-height:1.8;min-height:43px}.patch-question{font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:12px;padding-top:11px}.patch-question b{color:var(--lime);display:block;font-size:10px;font-weight:500;margin-bottom:5px}.patch-source{font-size:10px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:#8496a8}.field-label{display:block;font-size:12px;margin:17px 0 7px;color:#cbd5de}.subtext{font-size:11px;color:var(--muted)}.score-grid{display:grid;grid-template-columns:minmax(150px,1fr) 78px 78px 66px;gap:10px;align-items:center}.score-grid.head{font-size:10px;color:var(--muted);border-bottom:1px solid var(--line);padding:0 0 9px}.score-row{padding:14px 0;border-bottom:1px solid var(--line)}.score-row:last-child{border:0}.score-row label{font-size:12px;display:block}.score-row small{font-size:10px;color:var(--muted);display:block;margin-top:3px}.score-row input,.score-row select{width:100%;padding:6px 7px;font-size:12px}.score-a{color:var(--lime)}.score-b{color:var(--blue)}.score-note{margin-top:8px;font-size:11px;min-height:30px;width:100%;padding:5px 8px}.radar-wrap{position:relative;width:100%;max-width:350px;margin:auto}.radar-wrap svg{width:100%;height:auto}.radar-empty{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none;font-size:11px;color:var(--muted);background:radial-gradient(ellipse,#131a22dd 0,transparent 65%)}.score-result{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;text-align:center;align-items:center;margin-top:8px}.score-result strong{font:600 29px var(--mono);display:block}.score-result small{color:var(--muted);font-size:11px}.legend{display:flex;gap:17px;justify-content:center;font-size:11px;color:var(--muted);margin-top:11px}.legend i{display:inline-block;width:7px;height:7px;background:var(--lime);border-radius:50%;margin-right:5px}.legend i.blue{background:var(--blue)}.checklist{display:grid;gap:10px}.checkitem{display:flex;gap:10px;align-items:flex-start;font-size:12px}.checkitem input{min-height:auto;margin-top:4px;accent-color:var(--lime)}.control-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.control-head strong{font:600 30px var(--mono);color:var(--lime)}.slider-ends{display:flex;justify-content:space-between;color:var(--muted);font:10px var(--mono);margin-top:3px}.simulation-grid{display:grid;grid-template-columns:minmax(310px,1fr) minmax(0,1.35fr);gap:20px;align-items:start}.controls{display:grid;gap:21px;align-content:start}.preset-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.bo-result-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px;gap:10px}.bo-teams{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:15px}.bo-team:last-child{text-align:right}.bo-team b{font-size:16px}.bo-team strong{font:650 47px var(--mono);display:block;line-height:1.3;letter-spacing:-.06em;color:var(--lime);margin-top:6px}.bo-team:last-child strong{color:var(--blue)}.prob-track{height:10px;display:flex;border-radius:5px;overflow:hidden;gap:3px;background:var(--line)}.prob-track i{display:block;background:var(--lime);min-width:0;transition:width .2s}.prob-track i:last-child{background:var(--blue)}.prob-captions{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:10px;margin-top:9px}.bo-kpis{display:grid;grid-template-columns:1fr 1fr;gap:15px;border-top:1px solid var(--line);padding-top:19px;margin-top:22px}.bo-kpis span{font-size:11px;color:var(--muted);display:block}.bo-kpis b{font:500 21px var(--mono);display:block;margin-top:6px}.prob-row{display:grid;grid-template-columns:60px 1fr 56px;gap:13px;align-items:center;margin-top:14px;font:12px var(--mono)}.prob-bar{height:7px;border-radius:4px;background:#28323d;overflow:hidden}.prob-bar i{height:100%;background:var(--lime);display:block;border-radius:4px;transition:width .15s}.prob-bar.b i{background:var(--blue)}.prob-row strong{text-align:right;font-weight:400;color:var(--muted)}.series-score{font:600 32px var(--mono);letter-spacing:.07em;text-align:center;margin:13px 0}.score-actions{display:flex;gap:8px;justify-content:center}.game-prob{display:grid;grid-template-columns:31px 1fr 70px;gap:12px;align-items:center;font-size:12px;margin:12px 0}.game-prob label{color:var(--muted);font:11px var(--mono)}.game-prob input[type=number]{width:70px;font-size:12px}.game-prob.played{opacity:.45}.model-formula{font-family:var(--mono);padding:16px;border:1px solid var(--line);border-radius:10px;background:#0d141c;font-size:12px;overflow-wrap:anywhere;color:#cbd6df;margin:15px 0}.inverse{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}.inverse input{width:90px}.curve{margin:20px 0 0;width:100%;height:auto}.sources-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}.source-item{padding:16px 0;border-bottom:1px solid var(--line)}.source-item:last-child{border:0}.source-item a{font-size:13px;text-decoration:none;display:flex;align-items:center;gap:8px}.source-item a svg{width:13px;height:13px;color:var(--muted)}.source-item p{font-size:11px;color:var(--muted);margin-top:7px}.source-top{display:flex;gap:8px;align-items:center;justify-content:space-between}.source-top .pill{font-size:9px;padding:3px 7px}.missing-item{padding:12px 0;border-bottom:1px solid var(--line);font-size:12px;display:flex;justify-content:space-between;gap:10px}.missing-item:last-child{border:0}.missing-item span{color:var(--amber);font-size:11px}.data-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}.footer{display:flex;justify-content:space-between;gap:20px;color:#748497;font-size:10px;border-top:1px solid var(--line);padding-top:20px;margin-top:31px}.toast{position:fixed;bottom:26px;left:calc(50% + 100px);transform:translateX(-50%);background:var(--lime);border:1px solid #d1f893;color:#18220e;padding:11px 19px;border-radius:9px;font-size:12px;box-shadow:0 8px 30px #0006;z-index:100;max-width:90vw}.hidden,[hidden]{display:none!important}.mobile-label{display:none}.note-status{font-size:10px;color:var(--muted);text-align:right;margin-top:5px}.full-width{width:100%}.divider{height:1px;background:var(--line);margin:18px 0}.readme{font-size:12px;color:#c3ced9;line-height:1.9}.readme p+p{margin-top:10px}.number{font-family:var(--mono)}.amber-text{color:var(--amber)}.progress-bar{height:4px;background:#28333e;border-radius:5px;margin-top:10px}.progress-bar i{display:block;height:100%;background:var(--lime);border-radius:5px}.nowrap{white-space:nowrap}
+@media(min-width:1700px){.main{padding-top:42px}.matches{gap:18px}.match{padding:20px 23px}.grid-main{grid-template-columns:1.8fr 1fr}}
+@media(max-width:1250px){.sidebar{width:192px;padding-left:12px;padding-right:12px}.layout{margin-left:192px}.main{padding:26px}.topbar{padding:0 26px}.grid-main{grid-template-columns:1.35fr 1fr;gap:16px}.panel{padding:19px}.team-badge{width:43px;height:43px;font-size:16px;border-radius:11px}.team-identity{gap:10px}.team-identity h3{font-size:21px}.team-identity p{font-size:10px}.versus{grid-template-columns:1fr 35px 1fr}.score-grid{grid-template-columns:minmax(110px,1fr) 65px 65px 59px}.simulation-grid{grid-template-columns:minmax(275px,1fr) 1.25fr}.bo-team strong{font-size:40px}}
+@media(max-width:1050px){.sidebar{width:80px;padding:25px 12px}.brand{padding:0 7px 30px}.brand-text,.nav-label,.nav .tiny,.nav .nav-text,.sidebar-bottom{display:none}.nav button{padding:14px;justify-content:center}.layout{margin-left:80px}.page-head h1{font-size:26px}.grid-main{grid-template-columns:1.4fr 1fr}.matches{gap:9px}.match{padding:13px}.match-teams strong{font-size:20px}.match-top{font-size:9px}.toast{left:calc(50% + 40px)}.sources-grid{grid-template-columns:1fr 1fr}.two{gap:15px}}
+@media(max-width:850px){.grid-main,.simulation-grid,.sources-grid{grid-template-columns:1fr}.grid-main>.stack{grid-template-columns:1fr 1fr;gap:16px}.grid-main>.stack>.panel:last-child{grid-column:1/-1}.page-meta{max-width:215px}.page-head p{max-width:430px}.match-teams strong{font-size:18px}.topbar{padding:0 20px}.breadcrumb{font-size:11px}.topbar .btn{padding:8px 10px}.main{padding:24px 20px}.score-grid{grid-template-columns:1fr 80px 80px 80px}.radar-wrap{max-width:310px}.patch-grid{gap:12px}.mini-kpis{margin-top:18px}.panel{padding:21px}.grid-main.score-area>.stack{display:block}.grid-main.score-area>.stack>.panel+.panel{margin-top:18px}.simulation-grid>.stack{display:grid;grid-template-columns:1fr 1fr}.simulation-grid>.stack>.panel:first-child{grid-column:1/-1}.bo-team strong{font-size:45px}}
+@media(max-width:620px){.sidebar{width:100%;height:65px;top:auto;bottom:0;border-right:0;border-top:1px solid var(--line);padding:5px 10px;background:#0e141bf5;backdrop-filter:blur(12px)}.brand{display:none}.nav{display:flex;gap:4px;justify-content:space-around;height:100%}.nav button{flex:1;flex-direction:column;gap:3px;padding:5px 4px;border-radius:8px}.nav .nav-text{display:block;font-size:9px}.nav button svg{width:17px;height:17px}.layout{margin:0 0 65px}.topbar{height:62px;padding:0 16px;gap:10px}.breadcrumb{gap:7px}.breadcrumb span:first-child{display:none}.top-actions{gap:6px}.topbar select{max-width:94px;font-size:10px;min-height:34px;padding:5px}.topbar .btn{font-size:10px;padding:6px 9px;min-height:34px}.topbar .btn svg{width:14px;height:14px}.main{padding:24px 16px}.page-head{display:block;margin-bottom:20px}.page-head h1{font-size:27px}.page-head p{font-size:11px;margin-top:7px}.page-meta{max-width:none;justify-content:flex-start;padding-top:13px;gap:6px}.page-meta .pill{font-size:9px;padding:3px 8px}.matches{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}.match{padding:13px 14px}.match-teams strong{font-size:22px}.match-top{font-size:9px;margin-bottom:11px}.match-bottom{font-size:10px;margin-top:9px}.notice{font-size:11px;padding:10px 11px;margin-bottom:19px}.grid-main,.two,.grid-main>.stack,.simulation-grid>.stack,.patch-grid{grid-template-columns:1fr}.grid-main>.stack>.panel:last-child,.simulation-grid>.stack>.panel:first-child{grid-column:auto}.panel{padding:19px 17px;border-radius:13px}.section-title{margin-bottom:15px}.section-title h2{font-size:15px}.section-title small{font-size:10px}.team-identity p{font-size:9px}.team-badge{width:41px;height:44px}.versus{grid-template-columns:1fr 25px 1fr}.team-identity{gap:8px}.team-identity h3{font-size:22px}.stat-line{grid-template-columns:62px 1fr 62px}.stat-line .value{font-size:19px}.stat-mid{font-size:10px}.mini-kpi{padding:10px}.mini-kpi strong{font-size:16px}.mini-kpi span{font-size:9px}.score-grid{grid-template-columns:minmax(0,1fr) 56px 56px 51px;gap:7px}.score-row small{font-size:9px}.score-row label{font-size:11px}.score-row input,.score-row select{font-size:11px;padding:6px 4px}.score-grid.head{font-size:9px}.section-title .btn{font-size:10px;padding:5px 8px}.patch-fact{min-height:0}.footer{font-size:9px;display:block;line-height:1.9}.footer span{display:block}.toast{left:50%;bottom:82px;min-width:240px;text-align:center}.control-head strong{font-size:29px}.bo-team strong{font-size:43px}.bo-kpis b{font-size:19px}.score-actions{gap:6px}.score-actions .btn{padding:8px 10px}.source-top{align-items:flex-start;gap:8px}.source-top .pill{white-space:normal;text-align:center;flex-shrink:0}.source-item a{font-size:12px}.source-item p{font-size:10px}.panel-footer{gap:10px}.panel-footer .btn{padding:7px 10px;font-size:10px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{body{background:#fff;color:#111}.sidebar,.topbar,.matches,.data-actions,.btn,.toast{display:none!important}.layout{margin:0}.main{padding:0;max-width:none}.panel,.patch-card,.notice{break-inside:avoid;background:white;border-color:#bbb;color:#111}.muted,.hint,.subtext,.readme,.patch-fact,.patch-question{color:#444}.grid-main,.two,.sources-grid,.simulation-grid{display:block}.panel{margin-bottom:15px}.footer{color:#444}.page-head p{color:#444}*{color-scheme:light}}
+/* V2: four explicit surfaces, game-by-game draft board. */
+.brand{gap:9px;padding-left:5px;padding-right:0}.brand b{font-size:14px;letter-spacing:0;white-space:nowrap}.brand small{font-size:9px}.brand .mark{flex-shrink:0;width:35px;height:38px}
+.match-time{font:500 14px var(--mono);letter-spacing:0;color:#c7d4df;white-space:nowrap}.match-time b{font-weight:650;color:#e4ebf0}.time-dot{color:#64778a}.match-top{align-items:center}.match-top>span{white-space:nowrap;font-size:10px}.match-bottom{gap:6px}.schedule-inline{font-size:17px!important}
+.format-stat{display:grid;grid-template-columns:1.2fr 1fr 1fr;align-items:center;gap:18px;padding:15px 0;border-top:1px solid var(--line)}.format-stat>div:not(:first-child){text-align:center}.format-stat strong{font:600 24px var(--mono)}.format-stat small{display:block;font-size:10px;color:var(--muted);font-weight:400}.format-stat .fmt-tag{font:600 14px var(--mono)}.fmt-tag small{font-family:inherit;margin-top:5px}.format-head{font-size:11px;color:var(--muted);padding:8px 0;border-bottom:0}.format-head>div:first-child{font-size:10px}
+.text-btn,.rule-link{display:inline;padding:0;background:none;color:var(--lime);font-size:11px;text-decoration:none;border-radius:2px}.text-btn:hover,.rule-link:hover{text-decoration:underline}.rule-link{font:9px var(--mono);color:#8999a9;margin-left:5px}.legal-note{font-size:10px;color:var(--muted);margin:24px 3px 0;line-height:1.8}
+.game-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:4px 0 18px}.game-tab{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;padding:13px 16px;background:#101720;border:1px solid var(--line);border-radius:10px;color:var(--muted)}.game-tab>span{font:650 20px var(--mono);color:#bac6d3}.game-tab small{font:10px 'Segoe UI','Microsoft YaHei',sans-serif;display:block;margin-top:3px;color:var(--muted)}.game-tab em{font-size:10px;font-style:normal;white-space:nowrap}.game-tab.active{background:#202b20;border-color:#688044}.game-tab.active>span,.game-tab.active em{color:var(--lime)}.game-tab.conflict em{color:#f19f93}
+.draft-controls{display:flex;gap:22px;align-items:center;justify-content:space-between;border:1px solid var(--line);padding:16px 19px;border-radius:13px;background:var(--panel);margin-bottom:16px;flex-wrap:wrap}.current-game{display:flex;gap:13px;align-items:center}.game-number{font:700 20px var(--mono);width:43px;height:43px;display:grid;place-items:center;border:1px solid #4a6032;border-radius:10px;color:var(--lime);background:#222e20}.current-game strong{font-size:16px;letter-spacing:.02em}.current-game strong span{color:var(--muted);font-weight:400;font-size:12px;margin:0 7px}.current-game small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.draft-selects{display:flex;gap:18px}.draft-selects label{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:9px}.draft-selects select{min-width:78px;font-size:12px;min-height:34px}.draft-actions{display:flex;align-items:center;gap:7px}.draft-actions .btn{font-weight:500}
+.draft-board{display:grid;grid-template-columns:minmax(200px,1fr) minmax(310px,1.7fr) minmax(200px,1fr);gap:14px;align-items:stretch;grid-template-areas:'teamA pool teamB'}.draft-team{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px 13px;min-width:0;display:flex;flex-direction:column}.draft-team.side-a{grid-area:teamA}.draft-team.side-b{grid-area:teamB}.draft-team-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:18px;padding:0 3px}.draft-team-head>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.draft-team-head strong{font-size:26px;letter-spacing:-.035em;color:var(--lime)}.side-b .draft-team-head strong{color:var(--blue)}.side-tag{font-size:9px;border-radius:4px;padding:1px 5px;font-weight:500;white-space:nowrap}.side-tag.map-blue{color:#9dc5ff;background:#1f324a}.side-tag.map-red{color:#efa7a7;background:#3b262d}.pick-order{font:10px var(--mono);color:var(--muted)}.ban-label,.pick-label{display:flex;justify-content:space-between;font-size:11px;color:#bdcbd7;gap:4px;padding:0 2px;margin-bottom:9px}.ban-label span,.pick-label span{font-size:8px;color:#7e90a2}.ban-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-bottom:23px}.ban-slot{background:#0c131b;border:1px solid var(--line);border-radius:7px;min-width:0;height:74px;position:relative;padding:14px 2px 2px;overflow:hidden}.ban-slot .slot-order{font:8px var(--mono);position:absolute;top:3px;left:5px;color:#6d7f91}.ban-slot .avatar{width:29px;height:29px;border-radius:5px;margin:0 auto;opacity:.78}.ban-slot .avatar>span{font-size:10px;letter-spacing:0}.ban-slot small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;color:#98a5b2;margin-top:3px}.ban-empty{display:grid;place-items:center;height:29px;color:#526577;font:12px var(--mono)}.ban-slot:nth-child(4){border-left-color:#708096}.ban-slot.target,.pick-row.target{border-color:#b8e36d;background:#1d2a1d;box-shadow:0 0 0 1px #b8e36d22}.ban-slot.target .slot-order{color:var(--lime)}.slot-conflict{border-color:#cd756a!important;background:#342320!important}
+.pick-slots{display:grid;gap:9px}.pick-row{border:1px solid var(--line);border-radius:9px;display:flex;align-items:center;min-width:0;background:#101720;padding:9px 6px 9px 8px;min-height:79px;gap:4px}.pick-select{padding:0;display:flex;gap:8px;align-items:center;flex:1;min-width:0;background:none;text-align:left;position:relative}.pick-count{font:8px var(--mono);color:#698095;position:absolute;left:1px;top:-8px}.avatar{display:inline-grid;place-items:center;width:39px;height:39px;flex-shrink:0;background:linear-gradient(135deg,#293743,#18212b);border:1px solid #3d4e5d;border-radius:8px;overflow:hidden;position:relative;color:#d6e1e9}.avatar>span{font-size:13px;font-weight:550;letter-spacing:1px;z-index:0}.avatar.dmg-ad{background:linear-gradient(135deg,#3e3526,#20251f);border-color:#67573d;color:#e7c694}.avatar.dmg-ap{background:linear-gradient(135deg,#233d56,#1d2439);border-color:#405d81;color:#a9c9fa}.avatar.dmg-mix{background:linear-gradient(135deg,#413151,#223b3a);border-color:#68527b;color:#d2bee8}.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}.empty-avatar{border:1px dashed #435365;background:#151f2a;color:#6c8194;font-size:21px;font-weight:300}.pick-name{display:block;min-width:0}.pick-name b{font-size:12px;line-height:1.4;display:block;word-break:break-all;font-weight:600}.pick-name small{display:block;font-size:8px;color:var(--muted);margin-top:4px;line-height:1.4}.role-select{width:54px;min-width:54px;padding:4px 1px;font-size:10px;min-height:30px;background:#0d141c;border-radius:6px;color:#a1b1c0}.team-draft-count{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:auto;padding:18px 3px 0}
+.champ-pool{grid-area:pool;background:#111820;border:1px solid var(--line);border-radius:14px;min-width:0;padding:17px 15px 13px;display:flex;flex-direction:column}.draft-now{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.draft-now .eyebrow{font-size:9px;letter-spacing:.13em;display:block;margin-bottom:4px;color:#8799ab}.draft-now h2{font-size:19px;font-weight:600}.draft-now .pill{font:10px var(--mono)}.search-wrap{display:flex;align-items:center;gap:8px;border:1px solid #3b4b5a;border-radius:8px;background:#0c131b;padding:0 10px}.search-wrap svg{width:15px;height:15px;color:var(--muted);flex-shrink:0}.search-wrap input{border:0;background:transparent;width:100%;min-width:0;font-size:11px;padding-left:0;outline:none}.search-wrap:focus-within{outline:1px solid var(--lime)}.pool-filters{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:12px}.pool-filters .chip{padding:5px 0;font-size:10px;border-color:transparent;border-radius:5px}.pool-filters .chip.active{border-color:#536b3e}.pool-options{display:flex;justify-content:space-between;gap:10px;margin:11px 0 13px;font-size:9px;color:var(--muted)}.pool-options label{display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap}.pool-options label span{font-size:8px;color:#788b9b}.pool-options input{min-height:auto;accent-color:var(--lime);margin:0;width:12px;height:12px}.champ-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(59px,1fr));align-content:start;gap:7px 5px;max-height:389px;min-height:389px;overflow:auto;padding:2px 5px 5px 1px;scrollbar-width:thin;scrollbar-color:#465462 #111820}.champ{background:#17212b;border:1px solid transparent;padding:7px 2px 5px;min-width:0;border-radius:8px;text-align:center;transition:border-color .12s,background .12s}.champ .avatar{width:38px;height:38px;border-radius:7px}.champ .avatar>span{font-size:12px}.champ>b{display:block;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px;font-weight:500;color:#cbd6df}.champ>small{font-size:8px;color:#73879a;display:block;line-height:1.3;margin-top:2px}.champ:not(:disabled):hover{border-color:var(--lime);background:#263123}.champ.unavailable{opacity:.28;filter:grayscale(.75)}.pool-footer{font-size:9px;color:var(--muted);display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:auto;padding-top:14px}.pool-footer>span{line-height:1.5}.pool-footer .btn{font-size:10px}.pool-empty{grid-column:1/-1;text-align:center;padding:70px 15px;font-size:12px;color:var(--muted)}
+.lock-panel{background:#10171f;border:1px solid var(--line);border-radius:12px;padding:17px 19px;margin-top:15px}.lock-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.lock-header b{font-size:12px;font-weight:550}.lock-header>div>span{font-size:10px;color:var(--muted);margin-left:13px}.locked-champs{display:flex;flex-wrap:wrap;gap:6px}.locked-chip{display:inline-flex;gap:7px;align-items:center;border:1px solid #34424f;border-radius:5px;background:#1b242d;color:#9fadb9;font-size:10px;padding:4px 7px}.locked-chip small{font:8px var(--mono);color:#72899b}.lock-panel>.subtext{font-size:10px}
+.bp-analysis{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;align-items:stretch}.probability-panel{background:linear-gradient(125deg,#18231c,#131a22 75%)}.probability-panel .section-title{flex-wrap:wrap}.probability-panel .section-title h2{font-size:15px}.bp-prob-teams{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:24px 0 16px}.bp-prob-teams>div:last-child{text-align:right}.bp-prob-teams b{font-size:15px}.bp-prob-teams strong{font:650 48px var(--mono);letter-spacing:-.06em;line-height:1.3;color:var(--lime);display:block;margin-top:4px}.bp-prob-teams>div:last-child strong{color:var(--blue)}.result-summary{font-size:13px;margin:18px 0 10px;color:#d5e0cf}.result-caveat{font-size:11px;color:var(--muted);line-height:1.85}.result-caveat b{font-weight:500;color:#d5b58b}.prob-empty{text-align:center;padding:23px 10px 20px}.prob-empty>span{font:500 42px var(--mono);color:#52685d;letter-spacing:.05em}.prob-empty>span small{font:14px var(--mono);color:#6e8073}.prob-empty>p{font-size:11px;color:var(--muted);margin-top:10px}.validation-line{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#cbb285;margin-top:6px}.validation-line svg{width:14px;height:14px;flex-shrink:0;margin-top:3px}.analysis-empty{padding-top:45px;padding-bottom:35px}.contrib-header{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin:7px 0 9px}.contribution{display:grid;grid-template-columns:1.3fr 1fr 45px;gap:12px;align-items:center;padding:10px 0;border-top:1px solid #26313c}.contribution>span{font-size:10px}.contribution>b{font:10px var(--mono);text-align:right;font-weight:500}.contrib-track{height:7px;position:relative;background:#222f3b;border-radius:4px}.contrib-track .center{position:absolute;left:50%;top:-3px;width:1px;height:13px;background:#6f7f8e}.contrib-track .fill{position:absolute;top:0;bottom:0;background:var(--lime);border-radius:2px}.contrib-track .fill.negative{background:var(--blue)}.composition-panel{grid-column:1/-1}.team-readout{padding:2px 12px 3px 0}.team-readout+.team-readout{border-left:1px solid var(--line);padding-left:24px}.team-readout h3{font-size:18px;margin-bottom:9px}.team-readout>p{font-size:11px;line-height:1.8;color:#bccbd8}.composition-bars{display:grid;grid-template-columns:1fr 1fr;gap:10px 25px;margin:20px 0}.composition-bars>div{display:flex;align-items:center;gap:9px;font-size:9px;color:var(--muted)}.composition-bars span{width:39px;flex-shrink:0}.composition-bars i{height:4px;background:#253340;flex:1;display:block;border-radius:3px;overflow:hidden}.composition-bars em{display:block;height:100%;background:var(--lime)}.composition-bars em.b{background:var(--blue)}.composition-bars small{font:9px var(--mono);width:22px;text-align:right}.team-readout .team-warning{font-size:10px;color:#c4b08c;border-left:2px solid #615034;padding-left:8px;margin-top:8px}.team-readout .team-warning.neutral{color:var(--muted);border-color:#3b4d5c}.profile-details{border-top:1px solid var(--line);margin-top:18px;padding-top:15px}.profile-details summary{cursor:pointer;font-size:11px;color:var(--muted)}.profile-table-wrap{overflow:auto;margin-top:15px}.profile-table{border-collapse:collapse;width:100%;min-width:610px;text-align:center;font-size:10px}.profile-table th{color:var(--muted);font-weight:500}.profile-table th,.profile-table td{padding:8px;border-bottom:1px solid #293440}.profile-table th:first-child,.profile-table td:first-child{text-align:left;white-space:nowrap}.profile-table td small{font-size:9px;color:var(--muted);margin-left:6px}
+.version-intro{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:23px}.version-intro section{padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:13px}.version-intro section>span{font:10px var(--mono);color:var(--lime)}.version-intro h2{font-size:17px;font-weight:550;margin:12px 0 9px;letter-spacing:-.025em}.version-intro p{font-size:11px;color:var(--muted);line-height:1.9;margin-bottom:14px}.version-intro a{font-size:10px;color:#b1c2d3}.source-kind{display:flex;gap:12px;padding:15px 0;border-bottom:1px solid var(--line);align-items:flex-start}.source-kind:last-child{border-bottom:0}.source-kind .pill{margin-top:2px}.source-kind p{font-size:11px;color:#b8c7d4;line-height:1.9}.missing-item .missing-name{color:#b7c4d1;font-size:11px}.rule-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:20px}.rule-card{border:1px solid var(--line);padding:17px;border-radius:10px;background:#101820;scroll-margin-top:40px}.rule-card>span{font:10px var(--mono);color:var(--lime)}.rule-card h3{font-size:13px;margin:6px 0 8px}.rule-card p{font-size:11px;line-height:1.85;color:var(--muted)}.rule-highlight{outline:2px solid var(--lime);outline-offset:2px}
+@media(min-width:1700px){.draft-board{grid-template-columns:1fr 1.8fr 1fr;gap:18px}.pick-row{padding:11px 9px;min-height:82px}.pick-name b{font-size:13px}.champ-grid{grid-template-columns:repeat(auto-fill,minmax(68px,1fr));max-height:408px;min-height:408px}.champ .avatar{width:44px;height:44px}.champ>b{font-size:10px}}
+@media(max-width:1250px){.draft-board{grid-template-columns:minmax(190px,1fr) minmax(275px,1.55fr) minmax(190px,1fr);gap:10px}.draft-team{padding:16px 9px}.pick-select{gap:5px}.pick-name b{font-size:11px}.pick-name small{font-size:7px}.role-select{width:49px;min-width:49px;font-size:9px}.avatar{width:33px;height:36px}.ban-slots{gap:3px}.pick-label span{font-size:7px}.draft-team-head strong{font-size:23px}.draft-team-head>div{gap:6px}.champ-pool{padding:16px 11px 12px}.champ-grid{grid-template-columns:repeat(auto-fill,minmax(53px,1fr));gap:5px}.champ .avatar{width:34px;height:34px}.game-tab{padding:12px}.draft-controls{gap:12px}.draft-selects{gap:10px}.match-time{font-size:13px}.version-intro{gap:12px}.version-intro section{padding:18px}.version-intro h2{font-size:15px}}
+@media(max-width:1050px){.match-top>span{font-size:9px}.match-time{font-size:13px}.game-tab>span{font-size:18px}.game-tab em{font-size:9px}.draft-controls{justify-content:flex-start}.draft-actions{margin-left:auto}.draft-selects label{font-size:9px}.contribution{gap:8px}.version-intro h2{font-size:14px}.rule-grid{gap:11px}}
+@media(max-width:900px){.draft-board{grid-template-columns:1fr 1fr;grid-template-areas:'teamA teamB' 'pool pool';gap:14px}.draft-team{padding:18px 15px}.draft-team-head strong{font-size:27px}.pick-row{min-height:66px}.pick-name b{font-size:13px}.pick-name small{font-size:9px}.role-select{width:63px;min-width:63px;font-size:11px}.avatar{width:40px;height:40px}.pick-select{gap:10px}.pick-label span{font-size:9px}.ban-slot{height:72px}.ban-slot .avatar{width:31px;height:31px}.ban-slot small{font-size:9px}.champ-grid{grid-template-columns:repeat(auto-fill,minmax(65px,1fr));max-height:330px;min-height:230px}.champ .avatar{width:41px;height:41px}.champ>b{font-size:10px}.champ-pool{padding:20px}.pool-filters{display:flex;gap:9px}.pool-filters .chip{padding:6px 13px}.pool-options{font-size:10px}.pool-footer>span{font-size:10px}.bp-analysis{grid-template-columns:1fr 1fr}.game-tab{display:block}.game-tab>span{display:flex;gap:8px;align-items:baseline}.game-tab small{margin:0;font-size:9px}.game-tab em{display:block;margin-top:5px}.draft-controls{gap:18px}.version-intro{grid-template-columns:1fr}.version-intro section{padding:20px}.version-intro h2{font-size:17px;margin-top:7px}.version-intro p{margin-bottom:9px}.contribution{grid-template-columns:1.3fr .75fr 40px}.bp-prob-teams strong{font-size:43px}}
+@media(max-width:700px){.draft-selects{margin-left:auto}.draft-actions{margin-left:0}.bp-analysis{grid-template-columns:1fr}.composition-panel{grid-column:auto}.team-readout+.team-readout{border:0;border-top:1px solid var(--line);padding:18px 0 0}.rule-grid{grid-template-columns:1fr}.lock-header{align-items:flex-start}.lock-header>div>span{display:block;margin:4px 0 0}.draft-now h2{font-size:18px}}
+@media(max-width:620px){.match-time{font-size:12px}.match-top>span{font-size:8px}.time-dot{font-size:8px}.match-top{gap:6px}.match{padding:13px 12px}.match-teams strong{font-size:24px}.format-stat{gap:12px;padding:13px 0}.format-stat strong{font-size:23px}.format-stat small{font-size:9px}.game-tabs{gap:5px;margin-bottom:14px}.game-tab{padding:10px 7px;border-radius:8px}.game-tab>span{font-size:17px;display:block}.game-tab small{font-size:8px;display:block;margin-top:3px}.game-tab em{font-size:8px}.draft-controls{padding:14px;gap:13px}.current-game{gap:9px}.game-number{width:36px;height:38px;font-size:17px}.current-game strong{font-size:15px}.current-game small{font-size:9px}.draft-selects{gap:12px;margin:0;width:100%}.draft-selects label{flex:1;justify-content:space-between;font-size:10px}.draft-selects select{font-size:11px;min-width:65px}.draft-actions{width:100%;justify-content:space-between}.draft-actions .btn{font-size:10px}.draft-board{gap:10px}.draft-team{padding:14px 9px}.draft-team-head{display:block;position:relative;padding:0 1px;margin-bottom:14px}.draft-team-head>div{display:block}.draft-team-head strong{font-size:24px;display:block;margin-bottom:4px}.pick-order{position:absolute;right:0;top:8px;font-size:9px}.side-tag{font-size:8px}.ban-label,.pick-label{font-size:10px}.ban-label span{font-size:7px}.ban-slots{gap:3px;margin-bottom:17px}.ban-slot{height:54px;padding:13px 0 1px;border-radius:5px}.ban-slot .avatar{width:22px;height:22px;border-radius:4px}.ban-slot .avatar>span{font-size:8px;letter-spacing:0}.ban-slot small{font-size:6px;margin-top:1px}.ban-empty{height:23px;font-size:10px}.ban-slot .slot-order{font-size:7px;left:3px}.pick-label{display:block;margin-bottom:7px}.pick-label span{display:block;font-size:7px;margin-top:1px}.pick-row{padding:11px 5px 7px;min-height:89px;position:relative;display:block}.pick-select{gap:6px;width:100%;min-height:33px}.pick-select .avatar{width:29px;height:32px;border-radius:5px}.pick-select .avatar>span{font-size:9px;letter-spacing:0}.pick-count{font-size:7px;top:-8px}.pick-name b{font-size:10px}.pick-name small{font-size:7px;margin-top:2px}.role-select{width:100%;min-height:24px;margin-top:6px;font-size:9px;padding:1px 5px;border-color:#283a49}.team-draft-count{padding:12px 0 0;font-size:8px}.champ-pool{padding:16px 12px}.draft-now h2{font-size:18px}.champ-grid{grid-template-columns:repeat(auto-fill,minmax(54px,1fr));min-height:290px;max-height:360px;gap:6px 4px}.champ .avatar{width:36px;height:36px}.champ>b{font-size:9px}.pool-filters{display:grid;gap:3px}.pool-filters .chip{padding:5px 1px;font-size:10px}.pool-options{font-size:9px;gap:6px}.pool-options label span{font-size:7px}.pool-footer>span{font-size:9px}.lock-panel{padding:14px}.locked-chip{font-size:9px;padding:3px 5px}.lock-header b{font-size:11px}.lock-header .text-btn{font-size:10px}.bp-prob-teams strong{font-size:46px}.contribution{grid-template-columns:1.3fr 1fr 45px}.contribution>span{font-size:10px}.bp-analysis{gap:15px}.source-kind{gap:10px}.source-kind p{font-size:11px}.profile-details summary{font-size:10px}.draft-actions .btn svg{width:14px;height:14px}}
+@media(max-width:370px){.match-time{font-size:11px}.match-top>span{font-size:7px}.match{padding:12px 9px}.match-teams strong{font-size:22px}.draft-team{padding:13px 6px}.game-tab em{font-size:7px}.champ-grid{grid-template-columns:repeat(4,1fr)}}
+@media print{.draft-controls,.champ-pool,.game-tabs,.draft-actions,.pool-footer,.lock-panel,.text-btn{display:none!important}.draft-board{grid-template-columns:1fr 1fr;grid-template-areas:'teamA teamB'}.draft-team,.pick-row,.rule-card{background:white;border-color:#bbb;color:#111}.bp-analysis{display:block}.rule-grid{display:block}.rule-card{margin:12px 0}.draft-team-head strong,.pick-name b,.bp-prob-teams strong{color:#111}.legal-note{color:#444}}
+
+/* Portrait support; no changes to the existing navigation or draft layout. */
+.portrait-status{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;text-align:right;min-width:0;line-height:1.5}.portrait-state{font-size:9px;color:var(--amber)}.portrait-state.ready{color:var(--lime)}.portrait-status .text-btn{font-size:9px;white-space:nowrap}.portrait-status .text-btn:disabled{opacity:.4;cursor:not-allowed}.portrait-missing{outline:1px dotted var(--amber)}.pool-options{align-items:flex-start}.pool-options>label{padding-top:1px}.avatar img{display:block} .avatar img[hidden]{display:none!important}
+@media(max-width:620px){.portrait-status{gap:5px;max-width:210px}.portrait-state{font-size:8px}.portrait-status .text-btn{font-size:9px}}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳转到主要内容</a>
+<aside class="sidebar" aria-label="主导航">
+  <div class="brand"><div class="mark" aria-hidden="true">W</div><div class="brand-text"><b>八强分析工作台</b><small>WORLDS / 2026</small></div></div>
+  <div class="nav-label">分析工作台</div>
+  <nav class="nav" id="navigation"></nav>
+  <div class="sidebar-bottom"><span class="status-dot"></span><span id="save-state">本地工作区</span><p>静态数据快照 · 非实时<br>资料快照：2026.11.01<br>头像默认显示 · 无需账号</p></div>
+</aside>
+<div class="layout">
+  <header class="topbar">
+    <div class="breadcrumb"><span>英雄联盟 / 2026</span><span aria-hidden="true">/</span><span id="crumb">八强对阵</span></div>
+    <div class="top-actions">
+      <label class="sr-only" for="timezone">赛程显示时区</label>
+      <select id="timezone"><option value="Asia/Shanghai">北京时间</option><option value="America/Los_Angeles">洛杉矶时间</option><option value="UTC">UTC</option></select>
+      <button class="btn" id="export-top" type="button"></button>
+    </div>
+  </header>
+  <main class="main" id="main" tabindex="-1"></main>
+</div>
+<input id="import-file" type="file" accept=".json,application/json" class="hidden" aria-label="导入分析JSON文件">
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+<noscript><div style="padding:40px;margin-left:230px">这个工作台需要启用浏览器JavaScript。数据与运算全部在本地完成。</div></noscript>
+<script>
+/* Immutable, manually verified source snapshot. This file never fetches live data. */
+const WORLDS_DATA = Object.freeze({
+  schemaVersion: 1,
+  snapshot: '2026-11-01',
+  patch: '26.20',
+  videoUrl: 'https://www.youtube.com/watch?v=X5vHs7MqsL4',
+  teams: {
+    TES:{name:'TOP ESPORTS',region:'LPL'}, IG:{name:'Invictus Gaming',region:'LPL'},
+    GEN:{name:'Gen.G',region:'LCK'}, LYON:{name:'LYON',region:'LCS'},
+    DK:{name:'Dplus KIA',region:'LCK'}, BLG:{name:'Bilibili Gaming',region:'LPL'},
+    T1:{name:'T1',region:'LCK'}, KC:{name:'Karmine Corp',region:'LEC'},
+    HLE:{name:'Hanwha Life Esports',region:'LCK'}, MKOI:{name:'Movistar KOI',region:'LEC'},
+    G2:{name:'G2 Esports',region:'LEC'}, TLAW:{name:'Team Liquid Alienware',region:'LCS'},
+    CFO:{name:'CTBC Flying Oyster',region:'LCP'}, AL:{name:"Anyone’s Legend",region:'LPL'},
+    LOS:{name:'LOS',region:'CBLOL'}, TSW:{name:'Team Secret Whales',region:'LCP'}
+  },
+  matches: [
+    {id:'tes-ig',a:'TES',b:'IG',start:'2026-11-03T22:00:00Z'},
+    {id:'gen-lyon',a:'GEN',b:'LYON',start:'2026-11-04T22:00:00Z'},
+    {id:'dk-blg',a:'DK',b:'BLG',start:'2026-11-05T22:00:00Z'},
+    {id:'t1-kc',a:'T1',b:'KC',start:'2026-11-06T22:00:00Z'}
+  ],
+  // [round, team A, team B, map wins A, map wins B]. R1-5 of Swiss only.
+  swiss: [
+    [1,'GEN','IG',1,0],[1,'TLAW','CFO',0,1],[1,'AL','KC',0,1],[1,'G2','DK',0,1],
+    [1,'HLE','TES',1,0],[1,'LOS','T1',0,1],[1,'TSW','LYON',0,1],[1,'BLG','MKOI',0,1],
+    [2,'MKOI','CFO',1,0],[2,'KC','LYON',0,1],[2,'HLE','GEN',0,1],[2,'DK','T1',1,0],
+    [2,'TES','AL',1,0],[2,'LOS','G2',0,1],[2,'IG','TSW',1,0],[2,'BLG','TLAW',1,0],
+    [3,'DK','MKOI',2,0],[3,'LYON','GEN',1,2],[3,'IG','HLE',1,0],[3,'G2','TES',0,1],
+    [3,'T1','CFO',1,0],[3,'KC','BLG',0,1],[3,'TSW','LOS',0,2],[3,'AL','TLAW',0,2],
+    [4,'MKOI','T1',0,2],[4,'LYON','IG',1,2],[4,'BLG','TES',1,2],
+    [4,'CFO','KC',0,2],[4,'TLAW','LOS',1,2],[4,'G2','HLE',0,2],
+    [5,'KC','MKOI',2,0],[5,'LYON','LOS',2,1],[5,'BLG','HLE',2,0]
+  ],
+  sources: [
+    {id:'swiss',name:'LoL Esports · 瑞士轮完整赛果',type:'官方赛果',url:'https://lolesports.com/en-SG/tournament/115660540725177488/stage/115660540725570706',scope:'33场对局、双方比分与晋级记录。小局合计由本页计算。'},
+    {id:'schedule',name:'LoL Esports · 八强赛程',type:'官方赛程',url:'https://lolesports.com/en-US',scope:'TES–IG、GEN–LYON、DK–BLG、T1–KC的比赛顺序。'},
+    {id:'primer',name:'Worlds 2026 Primer',type:'官方赛事说明',url:'https://lolesports.com/en-GB/news/worlds-2026-primer',scope:'BO5赛制、参赛赛区、当地日期与开赛时间；本页统一换算为所选时区。'},
+    {id:'patch20',name:'Riot · 26.20 版本公告',type:'官方版本',url:'https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-20-notes/',scope:'世界赛使用26.20；所列改动限于召唤师峡谷，不包含经典模式。'},
+    {id:'patch19',name:'Riot · 26.19 版本公告',type:'官方版本',url:'https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-19-notes/',scope:'上路传送与蔚的改动。'},
+    {id:'selection',name:'Season Start 2026 · First Selection',type:'官方规则介绍',url:'https://lolesports.com/en-US/lolesports/news/season-start-2026-lol-esports',scope:'地图侧别与BP先后顺序分离；本页不预设蓝色方胜率加成。'},
+    {id:'format',name:'Liquipedia · Worlds 2026 赛制',type:'赛事资料库',url:'https://liquipedia.net/leagueoflegends/Worlds_2026',scope:'淘汰赛全局BP：系列赛已选用的英雄，后续小局双方都不可再选。'}
+  ],
+  patches: [
+    {role:'上路',champ:'奎桑提',tag:'削弱',patch:'26.20',fact:'W耗蓝各级增加5；常态/全盛姿态减伤由30%/75%降至25%/70%。',question:'盲选上单还能否保持抗压？是否需要保留反制位？',source:'patch20'},
+    {role:'上路',champ:'安蓓萨',tag:'削弱',patch:'26.20',fact:'被动伤害由5–30（+25%额外AD）降至5–25（+20%额外AD）。',question:'后期边线与进场输出是否仍足够？不能只看选手熟练度。',source:'patch20'},
+    {role:'打野',champ:'千珏',tag:'加强',patch:'26.20',fact:'W野怪伤害系数150%→165%；E减速时长1秒→1.5秒。',question:'选择输出型打野后，其他位置能否补齐先手与承伤？',source:'patch20'},
+    {role:'打野',champ:'莉莉娅',tag:'加强',patch:'26.20',fact:'R昏睡时长由全等级2.5秒改为2.5/2.75/3秒。',question:'中野是否有线权、伤害互补与可兑现的先手链条？',source:'patch20'},
+    {role:'下路',champ:'寒冰',tag:'削弱',patch:'26.20',fact:'攻击力成长3.5→3。',question:'队伍更需要她的功能性，还是射手位置的持续输出？',source:'patch20'},
+    {role:'下路',champ:'卢锡安',tag:'加强',patch:'26.20',fact:'攻击力成长2.5→2.9。',question:'下路线权能否变成野区控制和资源收益？',source:'patch20'},
+    {role:'系统',champ:'上路任务传送',tag:'调整',patch:'26.19',fact:'免费传送420→390秒；强化传送330–240→300–210秒；非上路不变。',question:'边线优势如何转成支援窗口？四人正面是否守得住？',source:'patch19'},
+    {role:'打野',champ:'蔚',tag:'削弱',patch:'26.19',fact:'被动护盾由最大生命值12%降至10%。',question:'锁头能力仍在，但先手后的存活和接团条件是否足够？',source:'patch19'}
+  ],
+  questions: {
+    'tes-ig':['晋级记录同为3–1，但BO1与BO3要分别比较。','TES击败BLG、IG击败LYON都是BO3，不能直接当作BO5交手证据。','重点检查第三套及之后阵容的可用性、对手调整与选手熟练度。'],
+    'gen-lyon':['瑞士轮GEN以2–1胜LYON：这是直接交手证据，但样本只有3局。','能赢下一局，不等于系列赛接近五五开。','重点核对LYON赢局的阵容是否可复制，以及GEN的后续调整。'],
+    'dk-blg':['DK在瑞士轮只打过一场BO3，不能据此推断其第四、第五局能力。','双方对MKOI的比赛赛制不同，先分开BO1与BO3再分析阵容。','优先检查全局BP中后段的可选英雄，不比较混合赛制的小局胜率。'],
+    't1-kc':['双方都以2–0击败MKOI，不能靠这个共同结果区分实力。','双方的BO1与BO3样本都不多，不能用晋级记录代替长系列赛能力。','重点补充长系列赛调整与英雄池资料，避免只依据队史。']
+  }
+});
+if (typeof module !== 'undefined') module.exports = WORLDS_DATA;
+
+</script><script>
+/*
+ * BP roster and editable-in-code tactical profiles. Champion identities are
+ * referenced against Riot's champion directory (2026-11-01). Positions,
+ * archetypes and ALL numeric profiles below are author heuristics, NOT Riot
+ * statistics, patch win rates, learned coefficients or verified player pools.
+ * New/unsupported champions can be drafted but do not produce a probability.
+ */
+const DraftChampions = (() => {
+  const roles = ['上路','打野','中路','下路','辅助'];
+  const keys = ['front','engage','peel','dps','wave','early','late','range','dive','split'];
+  const templates = {
+    tank:       [3,3,2,1,2,1,2,0,2,1],
+    fighter:    [2,1,1,2,2,2,2,0,2,3],
+    assassin:   [0,1,0,2,2,2,1,0,3,2],
+    battlemage: [1,1,1,3,3,1,3,1,1,2],
+    control:    [0,2,2,2,3,2,3,2,0,1],
+    burst:      [0,2,1,1,2,2,2,2,2,1],
+    artillery:  [0,0,1,2,3,2,2,3,0,1],
+    carry:      [0,0,1,3,2,1,3,2,0,1],
+    earlyadc:   [0,0,1,3,2,3,2,2,0,1],
+    engage:     [2,3,2,0,1,2,2,0,2,0],
+    enchanter:  [0,0,3,0,1,2,3,2,0,0],
+    catcher:    [1,3,2,0,1,2,2,2,1,0]
+  };
+  // id | display name | roles (0-4) | heuristic archetype | damage | search aliases
+  const rows = `
+Aatrox|亚托克斯|0|fighter|AD|剑魔 暗裔剑魔
+Ahri|阿狸|2|burst|AP|狐狸 九尾妖狐
+Akali|阿卡丽|02|assassin|AP|阿卡利 离群之刺
+Akshan|阿克尚|02|earlyadc|AD|影哨
+Alistar|阿利斯塔|4|engage|AP|牛头
+Ambessa|安蓓萨|0|fighter|AD|狼母
+Amumu|阿木木|14|tank|AP|木木
+Anivia|艾尼维亚|2|control|AP|冰鸟
+Annie|安妮|24|burst|AP|火女
+Aphelios|厄斐琉斯|3|carry|AD|月男
+Ashe|艾希|34|earlyadc|AD|寒冰
+AurelionSol|奥瑞利安·索尔|2|battlemage|AP|龙王 铸星龙王
+Aurora|阿萝拉|02|burst|AP|兔子 极光
+Azir|阿兹尔|2|battlemage|AP|沙皇
+Bard|巴德|4|catcher|AP|星界游神
+Belveth|卑尔维斯|1|fighter|AD|大卑 虚空女皇
+Blitzcrank|布里茨|4|catcher|AP|机器人
+Brand|布兰德|124|control|AP|火男
+Braum|布隆|4|engage|AP|弗雷尔卓德之心
+Briar|贝蕾亚|1|fighter|AD| briar
+Caitlyn|凯特琳|3|earlyadc|AD|女警
+Camille|卡蜜尔|0|fighter|AD|青钢影
+Cassiopeia|卡西奥佩娅|2|battlemage|AP|蛇女
+Chogath|科加斯|0|tank|AP|大虫子
+Corki|库奇|23|carry|AD|飞机
+Darius|德莱厄斯|0|fighter|AD|诺手
+Diana|黛安娜|12|fighter|AP|皎月
+DrMundo|蒙多|0|tank|AD|蒙多医生
+Draven|德莱文|3|earlyadc|AD|荣耀行刑官
+Ekko|艾克|12|assassin|AP|时间刺客
+Elise|伊莉丝|1|burst|AP|蜘蛛
+Evelynn|伊芙琳|1|assassin|AP|寡妇
+Ezreal|伊泽瑞尔|3|carry|MIX|EZ 探险家
+Fiddlesticks|费德提克|1|burst|AP|稻草人
+Fiora|菲奥娜|0|fighter|AD|剑姬
+Fizz|菲兹|2|assassin|AP|小鱼人
+Galio|加里奥|24|tank|AP|正义巨像
+Gangplank|普朗克|0|fighter|AD|船长
+Garen|盖伦|0|fighter|AD|德玛西亚之力
+Gnar|纳尔|0|fighter|AD|迷失之牙
+Gragas|古拉加斯|012|tank|AP|酒桶
+Graves|格雷福斯|1|earlyadc|AD|男枪
+Gwen|格温|01|fighter|AP|剪刀妹
+Hecarim|赫卡里姆|1|fighter|AD|人马
+Heimerdinger|黑默丁格|0234|control|AP|大头
+Hwei|彗|2|control|AP|画师
+Illaoi|俄洛伊|0|fighter|AD|触手妈
+Irelia|艾瑞莉娅|02|fighter|AD|刀妹
+Ivern|艾翁|1|enchanter|AP|翠神
+Janna|迦娜|4|enchanter|AP|风女
+JarvanIV|嘉文四世|1|fighter|AD|皇子 J4
+Jax|贾克斯|01|fighter|MIX|武器大师
+Jayce|杰斯|02|fighter|AD|杰ce 未来守护者
+Jhin|烬|3|carry|AD|戏命师
+Jinx|金克丝|3|carry|AD|暴走萝莉
+KSante|奎桑提|0|tank|AD|奎
+Kaisa|卡莎|3|carry|MIX|虚空之女
+Kalista|卡莉丝塔|3|earlyadc|AD|滑板鞋
+Karma|卡尔玛|24|enchanter|AP|扇子妈
+Karthus|卡尔萨斯|13|battlemage|AP|死歌
+Kassadin|卡萨丁|2|assassin|AP|虚空行者
+Katarina|卡特琳娜|2|assassin|AP|卡特
+Kayle|凯尔|0|carry|MIX|天使
+Kayn|凯隐|1|fighter|AD|影流之镰
+Kennen|凯南|0|burst|AP|电耗子
+Khazix|卡兹克|1|assassin|AD|螳螂
+Kindred|千珏|1|carry|AD|羊
+Kled|克烈|0|fighter|AD|暴怒骑士
+KogMaw|克格莫|3|carry|MIX|大嘴
+Leblanc|乐芙兰|2|assassin|AP|妖姬
+LeeSin|李青|1|fighter|AD|盲僧 瞎子
+Leona|蕾欧娜|4|engage|AP|女坦 日女
+Lillia|莉莉娅|1|battlemage|AP|小鹿
+Lissandra|丽桑卓|2|control|AP|冰女
+Locke|Locke|2|unknown|AP|洛克
+Lucian|卢锡安|3|earlyadc|AD|奥巴马 圣枪游侠
+Lulu|璐璐|4|enchanter|AP|露露
+Lux|拉克丝|24|artillery|AP|光辉
+Malphite|墨菲特|0|tank|AP|石头人
+Malzahar|玛尔扎哈|2|control|AP|蚂蚱
+Maokai|茂凯|014|tank|AP|大树
+MasterYi|易|1|fighter|AD|剑圣
+Mel|梅尔|24|control|AP|鎏金女郎
+Milio|米利欧|4|enchanter|AP|小火龙辅助
+MissFortune|厄运小姐|3|earlyadc|AD|女枪 MF
+Mordekaiser|莫德凯撒|0|fighter|AP|铁男
+Morgana|莫甘娜|24|catcher|AP|堕落天使
+Naafiri|纳亚菲利|12|assassin|AD|狗刀
+Nami|娜美|4|enchanter|AP|唤潮鲛姬
+Nasus|内瑟斯|0|fighter|AD|狗头
+Nautilus|诺提勒斯|4|engage|AP|泰坦
+Neeko|妮蔻|24|burst|AP|变色龙
+Nidalee|奈德丽|1|artillery|AP|豹女
+Nilah|尼菈|3|carry|AD|尼拉
+Nocturne|魔腾|1|assassin|AD|梦魇
+Nunu|努努与威朗普|1|tank|AP|雪人
+Olaf|奥拉夫|01|fighter|AD|狂战士
+Orianna|奥莉安娜|2|control|AP|发条
+Ornn|奥恩|0|tank|AP|山隐之焰
+Pantheon|潘森|0124|fighter|AD|不屈之枪
+Poppy|波比|014|tank|AD|圣锤之毅
+Pyke|派克|4|catcher|AD|血港鬼影
+Qiyana|奇亚娜|12|assassin|AD|元素女皇
+Quinn|奎因|0|earlyadc|AD|德玛西亚之翼
+Rakan|洛|4|engage|AP|幻翎
+Rammus|拉莫斯|1|tank|AP|龙龟
+RekSai|雷克塞|1|fighter|AD|挖掘机
+Rell|芮尔|4|engage|AP|镕铁少女
+Renata|烈娜塔|4|enchanter|AP|炼金男爵
+Renekton|雷克顿|0|fighter|AD|鳄鱼
+Rengar|雷恩加尔|01|assassin|AD|狮子狗
+Riven|锐雯|0|fighter|AD|瑞文
+Rumble|兰博|01|battlemage|AP|机械公敌
+Ryze|瑞兹|02|battlemage|AP|流浪法师
+Samira|莎弥拉|3|carry|AD|沙弥拉
+Sejuani|瑟庄妮|1|tank|AP|猪妹
+Senna|赛娜|34|carry|AD|涤魂圣枪
+Seraphine|萨勒芬妮|234|control|AP|歌姬
+Sett|瑟提|0|fighter|AD|腕豪
+Shaco|萨科|14|assassin|AD|小丑
+Shen|慎|04|tank|AP|暮光之眼
+Shyvana|希瓦娜|1|fighter|MIX|龙女
+Singed|辛吉德|0|tank|AP|炼金
+Sion|赛恩|0|tank|AD|塞恩 老司机
+Sivir|希维尔|3|carry|AD|轮子妈
+Skarner|斯卡纳|01|tank|AD|蝎子
+Smolder|斯莫德|3|carry|MIX|小火龙
+Sona|娑娜|4|enchanter|AP|琴女
+Soraka|索拉卡|4|enchanter|AP|奶妈
+Swain|斯维因|234|battlemage|AP|乌鸦
+Sylas|塞拉斯|2|fighter|AP|解脱者
+Syndra|辛德拉|2|burst|AP|球女
+TahmKench|塔姆|04|tank|AP|蛤蟆
+Taliyah|塔莉垭|12|control|AP|岩雀
+Talon|泰隆|12|assassin|AD|男刀
+Taric|塔里克|4|engage|AP|宝石
+Teemo|提莫|0|artillery|AP|迅捷斥候
+Thresh|锤石|4|catcher|AP|魂锁典狱长
+Tristana|崔丝塔娜|23|carry|AD|小炮
+Trundle|特朗德尔|01|fighter|AD|巨魔
+Tryndamere|泰达米尔|0|fighter|AD|蛮王
+TwistedFate|崔斯特|2|control|AP|卡牌
+Twitch|图奇|3|carry|AD|老鼠
+Udyr|乌迪尔|1|tank|MIX|兽灵行者
+Urgot|厄加特|0|fighter|AD|螃蟹
+Varus|韦鲁斯|3|carry|MIX|惩戒之箭
+Vayne|薇恩|03|carry|AD|VN
+Veigar|维迦|2|control|AP|小法
+Velkoz|维克兹|24|artillery|AP|大眼
+Vex|薇古丝|2|burst|AP|熬夜波比
+Vi|蔚|1|fighter|AD|皮城执法官
+Viego|佛耶戈|1|fighter|AD|破败王
+Viktor|维克托|2|control|AP|三只手
+Vladimir|弗拉基米尔|02|battlemage|AP|吸血鬼
+Volibear|沃利贝尔|01|fighter|MIX|狗熊
+Warwick|沃里克|01|fighter|AD|狼人
+MonkeyKing|孙悟空|01|fighter|AD|猴子 Wukong
+Xayah|霞|3|carry|AD|逆羽
+Xerath|泽拉斯|24|artillery|AP|远古巫灵
+XinZhao|赵信|1|fighter|AD|德邦总管
+Yasuo|亚索|023|fighter|AD|疾风剑豪
+Yone|永恩|02|fighter|MIX|封魔剑魂
+Yorick|约里克|0|fighter|AD|掘墓
+Yunara|芸阿娜|3|carry|AD|芸
+Yuumi|悠米|4|enchanter|AP|猫咪
+Zaahen|Zaahen|01|unknown|AD|亚恒
+Zac|扎克|014|tank|AP|生化魔人
+Zed|劫|2|assassin|AD|影流之主
+Zeri|泽丽|3|carry|AD|祖安花火
+Ziggs|吉格斯|23|artillery|AP|炸弹人
+Zilean|基兰|24|enchanter|AP|时光
+Zoe|佐伊|2|artillery|AP|暮光星灵
+Zyra|婕拉|14|control|AP|荆棘之兴`;
+  const overrides = {
+    Aatrox:{front:2,engage:2,late:2}, Ahri:{engage:3,dive:3},Akali:{late:3},
+    Anivia:{peel:3,wave:3},Aphelios:{early:1,late:3,range:2},Ashe:{engage:3,peel:2,range:3},
+    Azir:{engage:2,peel:2,range:3},Bard:{engage:3,peel:3},Braum:{engage:1,peel:3,front:3},
+    Caitlyn:{range:3,early:3},Camille:{engage:3,dive:3},Corki:{wave:3,range:2},
+    DrMundo:{engage:0,peel:0,late:3},Diana:{engage:3,dive:3},Elise:{early:3,late:1},
+    Ezreal:{range:3,engage:0},Fiddlesticks:{engage:3,dive:3},Fiora:{engage:0,late:3,split:3},
+    Galio:{peel:3,engage:3},Gangplank:{range:3,late:3,front:0},Gnar:{engage:3,range:2,front:2},
+    Gragas:{peel:3,range:1},Graves:{front:1,range:1,late:3},Gwen:{dps:3,late:3},
+    Hecarim:{engage:3,dive:3},Ivern:{peel:3,front:1},JarvanIV:{engage:3,dive:3,peel:2},
+    Jax:{late:3,dps:3},Jayce:{range:3,wave:3,front:1,early:3,dive:1},Jhin:{dps:1,range:3,engage:2},
+    KSante:{peel:3,engage:2,dps:2,split:2},Kaisa:{dive:3,late:3},Kalista:{engage:2,late:1},
+    Karma:{wave:3,early:3,late:2},Kassadin:{early:0,late:3},Kayle:{early:0,peel:2,late:3},
+    Kennen:{engage:3,dive:3},Kindred:{peel:3,early:2,late:3},Kled:{engage:3},KogMaw:{range:3},
+    LeeSin:{early:3,engage:2,peel:2},Lillia:{engage:3,dive:2},Lissandra:{engage:3,dive:3},
+    Lucian:{range:1},Lulu:{peel:3},Malphite:{dive:3},Malzahar:{engage:2,peel:3},
+    Maokai:{range:2,peel:3},MasterYi:{early:1,late:3,dps:3,engage:0},Milio:{peel:3},
+    MissFortune:{range:2,late:2,dps:2},Mordekaiser:{engage:1,dps:3},Morgana:{peel:3,front:0},
+    Nami:{engage:2,peel:3},Nasus:{early:0,late:3},Neeko:{engage:3,dive:3},
+    Nidalee:{early:3,late:1,peel:1},Nilah:{range:0,engage:2,dive:3},Nocturne:{engage:3,dive:3},
+    Orianna:{engage:2,peel:3},Ornn:{front:3,engage:3,late:3},Poppy:{peel:3,dive:1},
+    Rakan:{peel:3},Rell:{front:3},Renata:{engage:2,peel:3},Renekton:{early:3,late:1,engage:2},
+    Rumble:{engage:2,range:2,early:3},Ryze:{late:3,split:3},Samira:{range:1,dive:3},
+    Sejuani:{front:3,engage:3},Senna:{peel:3,range:3},Seraphine:{peel:3,engage:3},
+    Sett:{engage:2,dive:2},Shen:{peel:3,engage:1},Sivir:{wave:3,engage:1},
+    Skarner:{engage:3,peel:3},Smolder:{early:0,wave:3,late:3},Soraka:{peel:3,engage:0},
+    Swain:{front:2,engage:1},Sylas:{engage:2,dive:3},Syndra:{range:3,peel:2,late:3},
+    TahmKench:{peel:3,engage:1},Taliyah:{peel:3,engage:2},Taric:{peel:3,engage:1},
+    Thresh:{peel:3},Tristana:{wave:3,split:2,range:2,dive:2},Trundle:{engage:1,late:3,dps:3},
+    Varus:{range:3,engage:2},Vayne:{wave:0,late:3,range:1},Veigar:{early:1,peel:3},
+    Vex:{engage:3,dive:3},Vi:{engage:3,dive:3},Viego:{engage:1,dive:3},Viktor:{late:3,range:3},
+    Vladimir:{early:0,dive:3,peel:0},Volibear:{early:3,engage:2},MonkeyKing:{engage:3,dive:3},
+    Xayah:{peel:2},XinZhao:{early:3,engage:2,front:2},Yasuo:{engage:1,dive:3},
+    Yone:{engage:3,dive:3,late:3},Yorick:{split:3,engage:0},Zeri:{early:1,late:3},
+    Ziggs:{wave:3,range:3},Zilean:{peel:3},Zoe:{engage:2,range:3},Zyra:{engage:2,peel:2}
+  };
+  const list = rows.trim().split('\n').map(row => {
+    const [id,name,rs,kind,damage,aliases='']=row.trim().split('|');
+    const profile=templates[kind] ? {...Object.fromEntries(keys.map((k,i)=>[k,templates[kind][i]])),...overrides[id]} : null;
+    return {id,name,roles:[...rs].map(Number),kind,damage,aliases,profile,profileSource:profile?'R01':'missing'};
+  });
+  const byId=Object.assign(Object.create(null),Object.fromEntries(list.map(c=>[c.id,c])));
+  return {list,byId,roles,keys,templates,version:'draft-profiles-v2.0',source:'https://www.leagueoflegends.com/en-us/champions/'};
+})();
+if(typeof module!=='undefined')module.exports=DraftChampions;
+
+</script>
+<script id="portrait-assets" type="application/json">{"schemaVersion":1,"assetVersion":"16.21.1","assets":{}}</script>
+<script>
+/* Portrait resources are separate from the competition data and BP heuristics.
+ * Never represent a network-backed starter as a fully bundled offline file.
+ * A complete resource pack can be embedded by the browser exporter or build.py.
+ */
+const PortraitAssets = (() => {
+  'use strict';
+  const ids = DraftChampions.list.map(c => c.id);
+  const allowed = new Set(ids);
+  const KEY = 'worlds2026_champion_portraits_v1';
+  const VERSION = '16.21.1';
+  const assets = Object.create(null);
+  const embedded = Object.create(null);
+  const failed = new Set();
+  let running = false, finished = 0, storageOK = true;
+  function validData(s) {
+    return typeof s === 'string' && s.length < 220000 && /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s);
+  }
+  function merge(raw, target = assets) {
+    if (!raw || typeof raw !== 'object') return;
+    for (const id of ids) if (validData(raw[id])) target[id] = raw[id];
+  }
+  try { merge(JSON.parse(document.getElementById('portrait-assets').textContent).assets, embedded); } catch (_) {}
+  try { merge(JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (_) { storageOK = false; }
+  merge(embedded);
+  const sources = id => allowed.has(id) ? [
+    `https://ddragon.leagueoflegends.com/cdn/${VERSION}/img/champion/${id}.png`,
+    `https://ddragon.leagueoflegends.com/cdn/16.20.1/img/champion/${id}.png`,
+    `https://game.gtimg.cn/images/lol/act/img/champion/${id}.png`
+  ] : [];
+  function count() { return ids.filter(id => assets[id]).length; }
+  function info() {
+    const available = count();
+    return {available, total:ids.length, embedded:Object.keys(embedded).length,
+      complete:available===ids.length, running, failed:failed.size, finished, storageOK, version:VERSION};
+  }
+  function emit() { document.dispatchEvent(new CustomEvent('portrait-assets-change', {detail:info()})); }
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify(assets)); storageOK = true; }
+    catch (_) { storageOK = false; }
+  }
+  function source(id) { return assets[id] || sources(id)[0] || ''; }
+  function refresh() {
+    document.querySelectorAll('img[data-portrait]').forEach(img => {
+      const uri = assets[img.dataset.portrait];
+      if (uri && img.getAttribute('src') !== uri) {
+        img.hidden = false; img.removeAttribute('data-attempt'); img.src = uri;
+        img.parentElement.classList.remove('portrait-missing');
+      }
+    });
+  }
+  document.addEventListener('error', e => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement) || !img.dataset.portrait) return;
+    const id=img.dataset.portrait;
+    if (img.src.startsWith('data:')) {
+      // A corrupt local resource must not silently trigger an external request.
+      img.hidden=true; img.parentElement.classList.add('portrait-missing');
+      img.parentElement.title='头像资源损坏，暂用名称占位；可重新导入图片。';
+      return;
+    }
+    const next=Number(img.dataset.attempt || 0)+1;
+    const urls=sources(id);
+    if (next < urls.length) { img.dataset.attempt=String(next); img.src=urls[next]; }
+    else {
+      img.hidden=true; img.parentElement.classList.add('portrait-missing');
+      img.parentElement.title='头像尚未下载成功；请检查网络后重试。BP仍可使用。';
+    }
+  }, true);
+  async function compress(blob) {
+    if (!blob || blob.size > 1500000 || !/^image\/(png|jpeg|webp)/.test(blob.type)) throw Error('不支持的图片资源');
+    const img=new Image();
+    const url=URL.createObjectURL(blob);
+    try {
+      await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error('图片解码失败'));img.src=url;});
+      if (!img.naturalWidth || !img.naturalHeight) throw Error('空图片');
+      const canvas=document.createElement('canvas'); canvas.width=96; canvas.height=96;
+      const context=canvas.getContext('2d');
+      if (!context) throw Error('浏览器不支持图片打包');
+      context.drawImage(img,0,0,96,96);
+      const uri=canvas.toDataURL('image/webp',.9);
+      if (!validData(uri)) throw Error('图片格式无效');
+      return uri;
+    } finally { URL.revokeObjectURL(url); }
+  }
+  async function fetchOne(id) {
+    for (const url of sources(id)) {
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),7000);
+      try {
+        const response=await fetch(url,{mode:'cors',credentials:'omit',cache:'force-cache',referrerPolicy:'no-referrer',signal:controller.signal});
+        if (!response.ok) throw Error(`HTTP ${response.status}`);
+        assets[id]=await compress(await response.blob()); failed.delete(id); return;
+      } catch (_) {} finally { clearTimeout(timer); }
+    }
+    failed.add(id);
+  }
+  async function prepare() {
+    if (running || count()===ids.length) { refresh(); emit(); return info(); }
+    if (navigator.onLine===false) { emit(); return info(); }
+    running=true; finished=0; failed.clear(); emit();
+    const pending=ids.filter(id=>!assets[id]); let next=0;
+    async function worker() {
+      while (next < pending.length) {
+        const id=pending[next++]; await fetchOne(id); finished++;
+        if (finished % 12===0) persist();
+        refresh(); emit();
+      }
+    }
+    try { await Promise.all(Array.from({length:Math.min(6,pending.length)},worker)); }
+    finally { running=false; persist(); refresh(); emit(); }
+    return info();
+  }
+  async function importFiles(files) {
+    let accepted=0;
+    for (const file of files) {
+      const id=String(file.name).replace(/\.(?:png|jpe?g|webp)$/i,'');
+      if (!allowed.has(id)) continue;
+      try { assets[id]=await compress(file); failed.delete(id); accepted++; } catch (_) {}
+    }
+    persist(); refresh(); emit(); return accepted;
+  }
+  function exportOffline() {
+    if (count()!==ids.length) throw Error(`头像尚未齐全（${count()}/${ids.length}），不能导出为完整离线版。`);
+    const html=document.documentElement.cloneNode(true);
+    html.querySelector('#portrait-assets').textContent=JSON.stringify({schemaVersion:1,assetVersion:VERSION,assets});
+    html.querySelector('#main').replaceChildren();
+    html.querySelector('#navigation').replaceChildren();
+    html.querySelector('#toast').classList.add('hidden'); html.querySelector('#toast').textContent='';
+    // Do not include any current draft, notes, or imported personal workspace.
+    const body='<!doctype html>\n'+html.outerHTML;
+    const blob=new Blob([body],{type:'text/html;charset=utf-8'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url; a.download='worlds_quarterfinals_offline.html'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    return body;
+  }
+  return {source,sources,info,prepare,refresh,importFiles,exportOffline};
+})();
+
+</script><script>
+/* Pure state, draft validation and explicitly UNCALIBRATED composition rules.
+ * This is a BO5 draft worksheet, not a model trained on mixed BO1/BO3 records.
+ * No series win probability is produced. No outcome-dependent strategy model.
+ */
+const DraftModel = (() => {
+  const C=typeof DraftChampions!=='undefined'?DraftChampions:require('./champions.js');
+  const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+  const copy=x=>JSON.parse(JSON.stringify(x));
+  const SIGMOID=x=>1/(1+Math.exp(-x));
+  const RULES = [
+    {id:'R01',name:'英雄战术画像',text:'位置建议与0—3属性均为作者手工规则，未从职业赛拟合。英雄目录仅支持英雄身份，不支持这些数值。评分不代表当前版本强度、选手熟练度或对线胜率。'},
+    {id:'R02',name:'阵容汇总',text:'前排、开团、保护取队内最高两项之和÷5并截断到0—1。持续输出按上野中下辅权重0.85/0.65/1/1.3/0.25汇总÷8。前期、后期按相同权重平均÷3。清线取最高三项之和÷8；射程取最高三项之和÷9。边线只看上中，取最高值÷3。'},
+    {id:'R03',name:'对阵相互作用',text:'输出兑现=持续输出×(0.35+0.35×前排+0.30×保护)。阵容结构=0.35×前排+0.35×开团+0.30×清线。进场/射程威胁=0.6×开团×(1−对方保护)+0.4×射程×(1−对方开团)。混伤=1−1.6×|物理占比−0.5|；占比以常规输出画像加权，不模拟装备。'},
+    {id:'R04',name:'本局推导概率',text:'z=0.40×前期差+0.55×结构差+0.45×输出兑现差+0.45×威胁差+0.30×(0.7×后期差+0.3×边线差)+0.20×混伤差+0.20×联动差。p(A)=1/(1+exp(−z))。所有系数为作者规则，非历史统计。默认双方执行能力相同，不加入队伍实力、选手数据或选边加成。'},
+    {id:'R05',name:'组合联动',text:'仅显式标注卢锡安/娜美、霞/洛、皇子/发条、石头人/亚索、猴子/亚索的技能组合，每对计0.5，最多1。是手工启发式，不是实测胜率提升，也不是全部有效组合。'},
+    {id:'R06',name:'赛制与数据边界',text:'当前推导器只接受BO5中的单局阵容，不调用瑞士轮BO1/BO3胜率，不把本局结果换算为晋级率。全局BP只锁此前小局已选英雄，不延续普通禁用；前局未完成或后局发生冲突时暂停概率输出。Ban通过限制可选英雄影响BP，不直接额外加减概率。'}
+  ];
+  function sequence(first='a'){
+    if(!['a','b'].includes(first))throw Error('先选队无效');
+    const sides={f:first,s:first==='a'?'b':'a'},n={a:{ban:0,pick:0},b:{ban:0,pick:0}};
+    const order=[['f','ban'],['s','ban'],['f','ban'],['s','ban'],['f','ban'],['s','ban'],['f','pick'],['s','pick'],['s','pick'],['f','pick'],['f','pick'],['s','pick'],['s','ban'],['f','ban'],['s','ban'],['f','ban'],['s','pick'],['f','pick'],['f','pick'],['s','pick']];
+    return order.map(([s,type],i)=>{const side=sides[s];return {i,side,type,slot:n[side][type]++,phase:i<6?1:i<12?2:i<16?3:4};});
+  }
+  function defaultGame(){return {firstPick:'a',blue:'a',actions:Array(20).fill(null),roles:{a:Array(5).fill(null),b:Array(5).fill(null)},note:''};}
+  function defaultMatch(){return {format:'BO5',game:0,games:Array.from({length:5},defaultGame),notes:'',videoNotes:''};}
+  function entries(g,type,side){return sequence(g.firstPick).filter(s=>(!type||s.type===type)&&(!side||s.side===side)).map(s=>({...s,id:g.actions[s.i],role:s.type==='pick'?g.roles[s.side][s.slot]:null}));}
+  function picks(g,side){return entries(g,'pick',side).filter(e=>e.id&&e.id!=='__skip__');}
+  function priorLocks(match,index){const out=new Map();for(let j=0;j<index;j++)for(const e of picks(match.games[j])){if(!out.has(e.id))out.set(e.id,j+1);}return out;}
+  function invalidReason(match,index,actionIndex,id){
+    const g=match.games[index],s=sequence(g.firstPick)[actionIndex];
+    if(!s)return '无效BP槽位';
+    if(id==='__skip__')return s.type==='ban'?'':'选人不能跳过';
+    if(!C.byId[id])return '英雄不在本地候选库';
+    const old=priorLocks(match,index);
+    if(old.has(id))return `G${old.get(id)}已选，全局BP不可重复`;
+    if(g.actions.some((x,i)=>i!==actionIndex&&x===id))return '本局已经选用或禁用';
+    return '';
+  }
+  function assign(match,index,actionIndex,id){
+    const reason=invalidReason(match,index,actionIndex,id);if(reason)throw Error(reason);
+    const g=match.games[index],s=sequence(g.firstPick)[actionIndex];
+    g.actions[actionIndex]=id;
+    if(s.type==='pick'){
+      const used=new Set(g.roles[s.side].filter((r,j)=>j!==s.slot&&r!==null));
+      const c=C.byId[id],old=g.roles[s.side][s.slot];
+      if(old===null||used.has(old))g.roles[s.side][s.slot]=c.roles.find(r=>!used.has(r))??[0,1,2,3,4].find(r=>!used.has(r))??null;
+    }
+  }
+  function clear(g,i){const s=sequence(g.firstPick)[i];g.actions[i]=null;if(s.type==='pick')g.roles[s.side][s.slot]=null;}
+  function changeRole(g,side,slot,role){
+    if(!['a','b'].includes(side)||!Number.isInteger(slot)||slot<0||slot>4||!Number.isInteger(role)||role<0||role>4)throw Error('位置无效');
+    const prev=g.roles[side][slot],other=g.roles[side].findIndex((r,i)=>r===role&&i!==slot);
+    g.roles[side][slot]=role;if(other>=0)g.roles[side][other]=prev;
+  }
+  function changeFirst(g,first){
+    if(!['a','b'].includes(first))throw Error('先选队无效');
+    const old=entries(g);g.firstPick=first;g.actions=sequence(first).map(s=>old.find(e=>e.side===s.side&&e.type===s.type&&e.slot===s.slot)?.id??null);
+  }
+  function issues(match,index){
+    const g=match.games[index],reasons=[],seen=new Set(),locks=priorLocks(match,index);
+    for(const e of entries(g)){
+      if(!e.id)continue;
+      if(e.id==='__skip__'){if(e.type!=='ban')reasons.push('选人不可为空Ban');continue;}
+      if(!C.byId[e.id]){reasons.push('存在未知英雄');continue;}
+      if(seen.has(e.id))reasons.push(`${C.byId[e.id].name}在本局重复`);seen.add(e.id);
+      if(locks.has(e.id))reasons.push(`${C.byId[e.id].name}与G${locks.get(e.id)}已选英雄冲突`);
+    }
+    for(const side of ['a','b']){
+      const rs=picks(g,side).map(x=>x.role);
+      if(rs.some(r=>r===null))reasons.push(`${side==='a'?'左':'右'}方有英雄未分配位置`);
+      if(new Set(rs).size!==rs.length)reasons.push(`${side==='a'?'左':'右'}方位置重复`);
+    }
+    return [...new Set(reasons)];
+  }
+  function profile(list){
+    const items=list.map(p=>({c:C.byId[p.id],role:p.role}));
+    const roleWeights=[.85,.65,1,1.3,.25],sumW=items.reduce((s,x)=>s+roleWeights[x.role],0);
+    const top=(key,n,div)=>clamp(items.map(x=>x.c.profile[key]).sort((a,b)=>b-a).slice(0,n).reduce((a,b)=>a+b,0)/div);
+    const mean=key=>clamp(items.reduce((s,x)=>s+x.c.profile[key]*roleWeights[x.role],0)/(3*sumW));
+    const front=top('front',2,5),engage=top('engage',2,5),peel=top('peel',2,5),wave=top('wave',3,8),range=top('range',3,9);
+    const dps=clamp(items.reduce((s,x)=>s+x.c.profile.dps*roleWeights[x.role],0)/8);
+    const split=clamp(Math.max(0,...items.filter(x=>x.role===0||x.role===2).map(x=>x.c.profile.split))/3);
+    const masses=items.map(x=>({w:(x.c.profile.dps+.5)*roleWeights[x.role],ad:x.c.damage==='AD'?1:x.c.damage==='AP'?0:.5}));
+    const mass=masses.reduce((s,x)=>s+x.w,0),ad=mass?masses.reduce((s,x)=>s+x.w*x.ad,0)/mass:.5;
+    const balance=clamp(1-1.6*Math.abs(ad-.5));
+    const ids=new Set(items.map(x=>x.c.id)),pairs=[['Lucian','Nami'],['Xayah','Rakan'],['JarvanIV','Orianna'],['Malphite','Yasuo'],['MonkeyKing','Yasuo']].filter(p=>p.every(x=>ids.has(x)));
+    return {front,engage,peel,wave,range,dps,split,ad,balance,early:mean('early'),late:mean('late'),carry:dps*(.35+.35*front+.30*peel),structure:.35*front+.35*engage+.30*wave,synergy:Math.min(1,pairs.length*.5),pairs};
+  }
+  function analyze(match,index){
+    const g=match.games[index],a=picks(g,'a'),b=picks(g,'b'),bad=issues(match,index);
+    if(match.format!=='BO5')return {ready:false,reasons:['这个推导器只用于BO5内单局，不复用BO1/BO3模型。'],picked:a.length+b.length};
+    if(a.length<5||b.length<5)return {ready:false,reasons:[...bad,`还需选择${10-a.length-b.length}名英雄`],picked:a.length+b.length};
+    for(let j=0;j<index;j++){
+      if(picks(match.games[j]).length!==10||match.games[j].actions.some(x=>x===null))bad.push(`G${j+1}的BP未完成，跨局可用英雄尚未确定`);
+      if(issues(match,j).length)bad.push(`G${j+1}存在BP冲突，请先修正`);
+    }
+    const missing=[...a,...b].filter(x=>!C.byId[x.id]?.profile).map(x=>C.byId[x.id]?.name||x.id);
+    if(missing.length)bad.push(`${missing.join('、')}的战术画像未建立，不能套用其他英雄数值`);
+    if(bad.length)return {ready:false,reasons:[...new Set(bad)],picked:10};
+    const A=profile(a),B=profile(b);
+    A.threat=.6*A.engage*(1-B.peel)+.4*A.range*(1-B.engage);
+    B.threat=.6*B.engage*(1-A.peel)+.4*B.range*(1-A.engage);
+    const contributions=[
+      {name:'前期节奏',value:.40*(A.early-B.early),rule:'R04'},
+      {name:'前排 / 开团 / 清线',value:.55*(A.structure-B.structure),rule:'R03'},
+      {name:'持续输出兑现',value:.45*(A.carry-B.carry),rule:'R03'},
+      {name:'进场与射程相互作用',value:.45*(A.threat-B.threat),rule:'R03'},
+      {name:'后期与边线',value:.30*(.7*(A.late-B.late)+.3*(A.split-B.split)),rule:'R04'},
+      {name:'伤害类型分布',value:.20*(A.balance-B.balance),rule:'R03'},
+      {name:'显式技能联动',value:.20*(A.synergy-B.synergy),rule:'R05'}
+    ];
+    const z=contributions.reduce((s,x)=>s+x.value,0);
+    return {ready:true,picked:10,pA:SIGMOID(z),pB:SIGMOID(-z),z,A,B,contributions,bansComplete:g.actions.every(x=>x!==null),uncalibrated:true,neutralTeamPrior:true};
+  }
+  function gameStatus(match,index){const g=match.games[index],n=picks(g).length,bad=issues(match,index);if(bad.length)return {label:'有冲突',type:'error'};if(!n&&!g.actions.some(Boolean))return {label:'待BP',type:'empty'};const r=analyze(match,index);return {label:r.ready?'阵容已就绪':`${n}/10 已选`,type:r.ready?'ready':'pending'};}
+  function formatStats(team,rows){
+    const history=rows.filter(r=>r[1]===team||r[2]===team).map(([round,a,b,x,y])=>({round,opponent:a===team?b:a,for:a===team?x:y,against:a===team?y:x,format:Math.max(x,y)===1?'BO1':'BO3'}));
+    const result={history};for(const format of ['BO1','BO3','BO5']){const h=history.filter(r=>r.format===format);result[format]={series:h.length,w:h.filter(r=>r.for>r.against).length,l:h.filter(r=>r.for<r.against).length,mw:h.reduce((s,r)=>s+r.for,0),ml:h.reduce((s,r)=>s+r.against,0)};}result.w=history.filter(r=>r.for>r.against).length;result.l=history.length-result.w;return result;
+  }
+  function validateMatch(raw){
+    if(!raw||raw.format!=='BO5'||!Number.isInteger(raw.game)||raw.game<0||raw.game>4||!Array.isArray(raw.games)||raw.games.length!==5)throw Error('比赛结构无效');
+    const out=defaultMatch();out.game=raw.game;
+    for(const k of ['notes','videoNotes']){if(typeof raw[k]!=='string'||raw[k].length>12000)throw Error('笔记格式错误');out[k]=raw[k];}
+    out.games=raw.games.map(g=>{
+      if(!g||!['a','b'].includes(g.firstPick)||!['a','b'].includes(g.blue)||!Array.isArray(g.actions)||g.actions.length!==20||typeof g.note!=='string'||g.note.length>12000)throw Error('逐局BP数据格式错误');
+      const next=defaultGame();next.firstPick=g.firstPick;next.blue=g.blue;next.note=g.note;
+      next.actions=g.actions.map((id,i)=>{if(id!==null&&(typeof id!=='string'||(id!=='__skip__'&&!C.byId[id])))throw Error('含未知英雄');if(id==='__skip__'&&sequence(g.firstPick)[i].type!=='ban')throw Error('空Ban位置错误');return id;});
+      for(const side of ['a','b']){if(!Array.isArray(g.roles?.[side])||g.roles[side].length!==5||g.roles[side].some(r=>r!==null&&(!Number.isInteger(r)||r<0||r>4)))throw Error('位置数据错误');next.roles[side]=g.roles[side].slice();}
+      return next;
+    });
+    // Conflicting drafts remain importable as drafts; analyze() blocks probability.
+    return out;
+  }
+  return {RULES,sequence,defaultGame,defaultMatch,entries,picks,priorLocks,invalidReason,assign,clear,changeRole,changeFirst,issues,profile,analyze,gameStatus,formatStats,validateMatch,copy};
+})();
+if(typeof module!=='undefined')module.exports=DraftModel;
+
+</script><script>
+'use strict';
+(() => {
+  const D=WORLDS_DATA,C=DraftChampions,M=DraftModel;
+  const KEY='worlds2026_quarterfinals_workspace_v2',OLDKEY='worlds2026_quarterfinals_workspace_v1';
+  const $=id=>document.getElementById(id),clone=M.copy;
+  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const pct=x=>`${Math.round(x*100)}%`;
+  const paths={grid:'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',draft:'M4 4h6v7H4zM14 13h6v7h-6zM14 4h6M17 1v6M4 17h6M4 14l6 6',layers:'m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5',file:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5',download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',info:'M12 8h.01M12 11v6M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z',arrow:'M7 17 17 7M7 7h10v10',refresh:'M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5',upload:'M12 16V4m-5 5 5-5 5 5M4 16v5h16v-5',search:'m21 21-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z',undo:'M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12',check:'m5 12 4 4L19 6'};
+  const icon=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[n]||paths.file}"/></svg>`;
+  const tabs=[['overview','grid','八强对阵','01'],['bp','draft','BP演算','02'],['version','layers','版本分析','03'],['sources','file','证据与资料','04']];
+  const ui={step:null,search:'',role:'all',available:false,undo:{},sourceFocus:null};
+  function defaults(){return {schemaVersion:2,selected:'dk-blg',tab:'overview',tz:'Asia/Shanghai',filter:'全部',portraits:true,matches:Object.fromEntries(D.matches.map(m=>[m.id,M.defaultMatch()])),archivedV1:null};}
+  function validate(raw){
+    if(!raw||![1,2].includes(raw.schemaVersion)||!raw.matches)throw Error('不支持的工作区格式');
+    const out=defaults();
+    if(!D.matches.some(m=>m.id===raw.selected))throw Error('未知对阵');out.selected=raw.selected;
+    if(raw.schemaVersion===1){
+      for(const m of D.matches){const x=raw.matches[m.id];if(!x)throw Error('旧版对阵缺失');for(const k of ['notes','videoNotes']){if(typeof x[k]!=='string'||x[k].length>12000)throw Error('旧版笔记无效');out.matches[m.id][k]=x[k];}}
+      out.archivedV1=clone(raw);out.tab=raw.tab==='sources'?'sources':raw.tab==='meta'?'version':'overview';
+    }else{
+      if(!tabs.some(t=>t[0]===raw.tab))throw Error('未知页面');out.tab=raw.tab;
+      for(const m of D.matches)out.matches[m.id]=M.validateMatch(raw.matches[m.id]);
+      if(raw.archivedV1?.schemaVersion===1)out.archivedV1=clone(raw.archivedV1);
+      // Legacy avatar toggle no longer controls rendering.
+      out.portraits=true;
+    }
+    if(!['Asia/Shanghai','America/Los_Angeles','UTC'].includes(raw.tz))throw Error('未知时区');out.tz=raw.tz;
+    if(['全部','上路','打野','下路','系统'].includes(raw.filter))out.filter=raw.filter;
+    return out;
+  }
+  let state=defaults(),storageOK=true,initialMessage='';
+  try{const raw=localStorage.getItem(KEY),old=!raw&&localStorage.getItem(OLDKEY);if(raw)state=validate(JSON.parse(raw));else if(old){state=validate(JSON.parse(old));initialMessage='已迁移旧版笔记；原评分和公式参数仅归档，不参与BP演算。';}}catch(e){storageOK=false;initialMessage='本地保存不可用或旧记录无法读取。可继续使用，并导出JSON备份。';}
+  const match=()=>D.matches.find(m=>m.id===state.selected),ms=()=>state.matches[state.selected],gi=()=>ms().game,game=()=>ms().games[gi()];
+  const team=side=>match()[side],profile=t=>M.formatStats(t,D.swiss);
+  const source=id=>D.sources.find(s=>s.id===id);
+  const ref=(id,label='来源 ↗')=>`<a href="${esc(source(id)?.url||'#')}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+  const title=(s,right='')=>`<div class="section-title"><h2>${s}</h2>${right}</div>`;
+  const notice=(text,type='gray')=>`<div class="notice ${type}">${icon('info')}<div>${text}</div></div>`;
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));storageOK=true;}catch(e){storageOK=false;}if($('save-state'))$('save-state').textContent=storageOK?'已保存在此浏览器':'仅本次会话 · 请导出';}
+  let toastTimer;
+  function toast(text){$('toast').textContent=text;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),4200);}
+  function timeParts(iso){const p=new Intl.DateTimeFormat('en-GB',{timeZone:state.tz,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(iso)),x=Object.fromEntries(p.map(p=>[p.type,p.value]));return {date:`${x.month}.${x.day}`,time:`${x.hour}:${x.minute}`};}
+  const tzLabel=()=>({'Asia/Shanghai':'北京时间 UTC+8','America/Los_Angeles':'洛杉矶时间','UTC':'UTC'}[state.tz]);
+  function head(text,sub,eyebrow='WORLDS 2026 / QUARTERFINALS'){return `<div class="page-head"><div><div class="eyebrow">${eyebrow}</div><h1>${text}</h1><p>${sub}</p></div><div class="page-meta"><span class="pill green">26.20 世界赛版本</span><span class="pill">静态快照 2026.11.01</span></div></div>`;}
+  function matchCards(){return `<section class="matches" aria-label="选择八强对阵">${D.matches.map((m,i)=>{const t=timeParts(m.start),a=profile(m.a),b=profile(m.b);return `<button type="button" class="match ${m.id===state.selected?'active':''}" data-match="${m.id}" aria-pressed="${m.id===state.selected}" aria-label="分析${m.a}对${m.b}"><div class="match-top"><span>QF / 0${i+1}</span><time class="match-time" datetime="${m.start}">${t.date}<span class="time-dot"> · </span><b>${t.time}</b></time></div><div class="match-teams"><strong>${m.a}</strong><em>VS</em><strong>${m.b}</strong></div><div class="match-bottom"><span>${a.w}–${a.l} 晋级</span><span>BO5</span><span>${b.w}–${b.l} 晋级</span></div></button>`;}).join('')}</section>`;}
+  function foot(){return `<footer class="footer"><span>八强分析工作台 · 个人赛事分析，非Riot官方产品</span><span>本地保存 · 静态快照 · ${tzLabel()}</span></footer>`;}
+  function historyHTML(t){const p=profile(t);return `<div><div class="history-head"><b>${t} <span>${D.teams[t].region}</span></b><span>晋级 ${p.w}–${p.l}</span></div>${p.history.map(r=>`<div class="history-row"><span class="round">R${r.round}</span><span>${r.opponent}<small class="format">${r.format}</small></span><span class="score">${r.for} : ${r.against}</span><span class="result ${r.for<r.against?'loss':''}">${r.for>r.against?'胜':'负'}</span></div>`).join('')}</div>`;}
+  function commonHTML(a,b){const pa=profile(a),pb=profile(b),rows=pa.history.filter(r=>pb.history.some(s=>s.opponent===r.opponent));return rows.length?rows.map(r=>{const s=pb.history.find(s=>s.opponent===r.opponent);return `<div class="common"><span>${a} ${r.for}:${r.against}<small class="format">${r.format}</small></span><span>vs ${r.opponent}</span><span>${b} ${s.for}:${s.against}<small class="format">${s.format}</small></span></div>`;}).join(''):'<p class="subtext">本快照中没有共同对手。</p>';}
+  function overview(){const m=match(),a=profile(m.a),b=profile(m.b),t=timeParts(m.start),done=ms().games.filter((g,i)=>M.analyze(ms(),i).ready).length;
+    const row=(f,extra)=>`<div class="format-stat"><div class="fmt-tag">${f}<small>${extra}</small></div><div><strong class="score-a">${a[f].series?`${a[f].w}–${a[f].l}`:'—'}</strong><small>${f==='BO3'&&a[f].series?`小局 ${a[f].mw}–${a[f].ml}`:a[f].series?`${a[f].series}场`:'本快照未接入'}</small></div><div><strong class="score-b">${b[f].series?`${b[f].w}–${b[f].l}`:'—'}</strong><small>${f==='BO3'&&b[f].series?`小局 ${b[f].mw}–${b[f].ml}`:b[f].series?`${b[f].series}场`:'本快照未接入'}</small></div></div>`;
+    return head('八强分析工作台','八强对阵 · 逐局BP演算 · 版本分析 · 结论出处')+matchCards()+
+    `<div class="grid-main"><div class="stack"><section class="panel">${title('对局概览','<span class="pill">瑞士轮赛果快照</span>')}<div class="versus"><div class="team-identity"><div class="team-badge">${m.a}</div><div><h3>${m.a}</h3><p>${D.teams[m.a].name} · ${D.teams[m.a].region}</p></div></div><div class="vs">VS</div><div class="team-identity right"><div class="team-badge b">${m.b}</div><div><h3>${m.b}</h3><p>${D.teams[m.b].name} · ${D.teams[m.b].region}</p></div></div></div>
+    <div class="format-stat format-head"><div>按赛制分开</div><div>${m.a}</div><div>${m.b}</div></div>${row('BO1','瑞士轮')}${row('BO3','晋级 / 淘汰战')}${row('BO5','历史长系列赛')}
+    <p class="hint">BO1、BO3、BO5不合并成一个战力或胜率。上方“3–1晋级”仅是瑞士轮晋级记录。${ref('swiss','原始赛果 ↗')}</p>
+    <div class="mini-kpis"><div class="mini-kpi"><span>开赛 · ${tzLabel()}</span><strong class="schedule-inline">${t.date} ${t.time}</strong></div><div class="mini-kpi"><span>当前赛制</span><strong>BO5</strong></div><div class="mini-kpi"><span>已就绪阵容</span><strong>${done} / 5</strong></div></div><div class="panel-footer"><span>每一局保存独立的选禁与阵容</span><button class="btn primary" data-goto="bp">进入BP演算 ${icon('arrow')}</button></div></section>
+    <section class="panel">${title('晋级路径','<small>对手、赛制与比分分别保留</small>')}<div class="two">${historyHTML(m.a)}${historyHTML(m.b)}</div></section></div>
+    <div class="stack"><section class="panel">${title('这场先看什么','<span class="pill amber">分析提示</span>')}${D.questions[m.id].map((q,i)=>`<div class="fact-line"><span class="num">0${i+1}</span><span>${esc(q)}</span></div>`).join('')}<p class="story-note">待核对问题，不作为默认胜率或实力评分。</p></section>
+    <section class="panel">${title('共同对手','<small>不作胜负传递</small>')}${commonHTML(m.a,m.b)}<p class="hint">同一对手也可能对应不同赛制、阵容与比赛条件。</p></section>
+    <section class="panel">${title('本场笔记','<span class="pill">本地保存</span>')}<label class="sr-only" for="overview-notes">本场分析笔记</label><textarea id="overview-notes" data-note="notes" maxlength="12000" placeholder="记录这场系列赛的关键观察与依据……">${esc(ms().notes)}</textarea></section></div></div>`+foot();
+  }
+  function currentStep(){return ui.step!==null?ui.step:game().actions.findIndex(x=>x===null);}
+  function resetUI(){ui.step=null;ui.search='';ui.role='all';ui.available=false;}
+  const undoKey=()=>`${state.selected}:${gi()}`;
+  function remember(){const k=undoKey();ui.undo[k]??=[];ui.undo[k].push(clone(game()));if(ui.undo[k].length>35)ui.undo[k].shift();}
+  function portrait(c,cls=''){
+    if(!c)return '<span class="avatar empty-avatar">＋</span>';
+    return `<span class="avatar ${cls} dmg-${c.damage.toLowerCase()}" title="${esc(c.name)}"><span aria-hidden="true">${esc(c.name.slice(0,2))}</span><img src="${PortraitAssets.source(c.id)}" data-portrait="${c.id}" alt="${esc(c.name)}" width="96" height="96" decoding="async" referrerpolicy="no-referrer"></span>`;
+  }
+  function portraitStatusHTML(){
+    const p=PortraitAssets.info();
+    const text=p.embedded===p.total?'全部头像已内嵌 · 离线可用':p.complete?'头像已缓存 · 可导出离线版':p.running?`正在准备离线头像 ${p.available}/${p.total}`:`初次需联网准备头像 ${p.available}/${p.total}`;
+    return `<span class="portrait-state ${p.complete?'ready':''}" id="portrait-state" role="status">${text}</span><button type="button" class="text-btn" id="retry-portraits" ${p.running||p.complete?'hidden':''}>重试</button><button type="button" class="text-btn" id="export-offline" ${p.complete?'':'disabled'} title="头像齐全后，导出所有图片直接内嵌的单文件网页">导出离线版</button>`;
+  }
+  function updatePortraitStatus(){
+    const box=$('portrait-status');if(box)box.innerHTML=portraitStatusHTML();
+  }
+  document.addEventListener('portrait-assets-change',updatePortraitStatus);
+  function gameTabs(){return `<div class="game-tabs" role="group" aria-label="选择本场小局">${ms().games.map((g,i)=>{const s=M.gameStatus(ms(),i);return `<button class="game-tab ${i===gi()?'active':''} ${s.type==='error'?'conflict':''}" data-game="${i}" aria-pressed="${i===gi()}"><span>G${i+1}<small>第${i+1}局</small></span><em>${s.label}</em></button>`;}).join('')}</div>`;}
+  function teamBoard(side){const g=game(),s=currentStep(),seq=M.sequence(g.firstPick),lock=M.priorLocks(ms(),gi()),bans=M.entries(g,'ban',side),picks=M.entries(g,'pick',side);
+    return `<section class="draft-team side-${side}" aria-label="${team(side)}禁选区"><div class="draft-team-head"><div><strong>${team(side)}</strong><span class="side-tag ${g.blue===side?'map-blue':'map-red'}">${g.blue===side?'蓝色方':'红色方'}</span></div><span class="pick-order">${g.firstPick===side?'先选':'后选'}</span></div><div class="ban-label">禁用 <span>前三Ban / 后两Ban</span></div><div class="ban-slots">${bans.map(e=>{const c=C.byId[e.id],conflict=e.id&&lock.has(e.id);return `<button class="ban-slot ${s===e.i?'target':''} ${conflict?'slot-conflict':''}" data-step="${e.i}" title="${team(side)} 第${e.slot+1}禁${c?'：'+c.name:''}" aria-label="${team(side)} 第${e.slot+1}禁"><span class="slot-order">${e.slot+1}</span>${c?portrait(c):`<span class="ban-empty">${e.id==='__skip__'?'空':'—'}</span>`}<small>${c?esc(c.name):e.id==='__skip__'?'空Ban':'未禁'}</small></button>`;}).join('')}</div><div class="pick-label">选用 <span>位置可交换，不等同于选人顺序</span></div><div class="pick-slots">${picks.map(e=>{const c=C.byId[e.id],conflict=e.id&&lock.has(e.id);return `<div class="pick-row ${s===e.i?'target':''} ${conflict?'slot-conflict':''}"><button class="pick-select" data-step="${e.i}" aria-label="${team(side)} 第${e.slot+1}选"><span class="pick-count">P${e.slot+1}</span>${portrait(c)}<span class="pick-name"><b>${c?esc(c.name):'选择英雄'}</b><small>${conflict?'与前局已选冲突':c?c.damage+' · '+(c.profile?'规则画像':'画像未建立'):'点击槽位，再选英雄'}</small></span></button><label class="sr-only" for="role-${side}-${e.slot}">${team(side)}第${e.slot+1}选的位置</label><select id="role-${side}-${e.slot}" class="role-select" data-role-side="${side}" data-role-slot="${e.slot}" ${c?'':'disabled'}><option value="" ${e.role===null?'selected':''}>位置</option>${C.roles.map((r,j)=>`<option value="${j}" ${e.role===j?'selected':''}>${r}</option>`).join('')}</select></div>`;}).join('')}</div><div class="team-draft-count"><span>${picks.filter(e=>e.id).length} / 5 已选</span><span>${bans.filter(e=>e.id).length} / 5 已禁</span></div></section>`;
+  }
+  function poolItems(){const index=currentStep(),g=game(),term=ui.search.trim().toLowerCase(),list=C.list.filter(c=>(ui.role==='all'||c.roles.includes(+ui.role))&&(!term||`${c.id} ${c.name} ${c.aliases}`.toLowerCase().includes(term))).map(c=>({c,why:index<0?'请点击一个BP槽位':M.invalidReason(ms(),gi(),index,c.id)})).filter(x=>!ui.available||!x.why);
+    return list.length?list.map(({c,why})=>`<button class="champ ${why?'unavailable':''}" data-champ="${c.id}" ${why?'disabled':''} title="${esc(c.name+(why?' · '+why:' · '+C.roles.filter((r,i)=>c.roles.includes(i)).join('/')))}" aria-label="${esc(c.name+(why?'，'+why:''))}">${portrait(c,'pool-avatar')}<b>${esc(c.name)}</b><small>${why?(why.startsWith('G')?'前局已选':why.includes('本局')?'本局占用':'已完成'):c.profile?C.roles[c.roles[0]]:'画像待补'}</small></button>`).join(''):'<div class="pool-empty">没有匹配英雄。可清空搜索或切换位置。</div>';
+  }
+  function poolHTML(){const step=currentStep(),s=M.sequence(game().firstPick)[step],n=game().actions.filter(Boolean).length;return `<section class="champ-pool"><div class="draft-now"><div><span class="eyebrow">${s?`STEP ${String(step+1).padStart(2,'0')} / 20`:'DRAFT COMPLETE'}</span><h2>${s?`<span class="score-${s.side}">${team(s.side)}</span> ${s.type==='ban'?'禁用英雄':'选择英雄'}`:'本局BP已完成'}</h2></div><span class="pill">${n}/20</span></div><div class="search-wrap">${icon('search')}<label class="sr-only" for="champ-search">搜索英雄名称、英文或简称</label><input id="champ-search" type="search" autocomplete="off" placeholder="搜索英雄 / 英文 / 简称" value="${esc(ui.search)}"></div><div class="pool-filters"><button class="chip ${ui.role==='all'?'active':''}" data-pool-role="all">全部</button>${C.roles.map((r,i)=>`<button class="chip ${ui.role===String(i)?'active':''}" data-pool-role="${i}">${r}</button>`).join('')}</div><div class="pool-options"><label><input type="checkbox" id="available-only" ${ui.available?'checked':''}>只看可用</label><span id="portrait-status" class="portrait-status">${portraitStatusHTML()}</span></div><div class="champ-grid" id="champ-grid">${poolItems()}</div><div class="pool-footer"><span>点击左右槽位可改选；选人后可交换位置。</span><button class="btn small ghost" id="skip-ban" ${s?.type==='ban'?'':'disabled'}>空Ban</button></div></section>`;}
+  function lockHTML(){const locks=M.priorLocks(ms(),gi()),unfinished=ms().games.slice(0,gi()).map((g,i)=>g.actions.some(x=>x===null)?`G${i+1}`:null).filter(Boolean);return `<div class="lock-header"><div><b>全局BP · 前局已选</b><span>${locks.size} 名不可再选 / 禁</span></div><button class="text-btn" data-goto="sources" data-source-focus="rule-R06">规则出处 ↗</button></div>${locks.size?`<div class="locked-champs">${[...locks].map(([id,n])=>`<span class="locked-chip">${esc(C.byId[id]?.name||id)}<small>G${n}</small></span>`).join('')}</div>`:'<p class="subtext">首局没有跨局锁定。普通Ban不带入下一局。</p>'}${unfinished.length?`<p class="hint amber-text">${unfinished.join('、')}尚未完成BP。当前局可编辑，概率需待前局完整后推导。</p>`:''}`;}
+  function roleMismatch(side){return M.picks(game(),side).filter(p=>!C.byId[p.id].roles.includes(p.role)).map(p=>`${C.byId[p.id].name}·${C.roles[p.role]}`);}
+  function analysisHTML(){const r=M.analyze(ms(),gi()),m=match();
+    if(!r.ready)return `<section class="panel probability-panel">${title(`G${gi()+1} · 本局BP推导概率`,'<span class="pill">待阵容就绪</span>')}<div class="prob-empty"><span>— <small>:</small> —</span><p>补齐双方阵容后推导本局，不推算系列赛晋级率。</p></div>${r.reasons.map(x=>`<p class="validation-line">${icon('info')}<span>${esc(x)}</span></p>`).join('')}<p class="hint">不以默认50%冒充尚未完成的BP结论。</p></section><section class="panel">${title('本局推导依据')}<div class="empty analysis-empty">从左右禁选槽位开始。<br>完成十名英雄与位置分配后，显示阵容特点、相互作用与计算贡献。</div><p class="hint">规则模型未经过历史比赛回测；不自动使用BO1或BO3战绩。</p></section>`;
+    const adv=r.pA>.52?'a':r.pA<.48?'b':null,mismatches=['a','b'].flatMap(s=>roleMismatch(s).map(x=>`${team(s)}：${x}`));
+    return `<section class="panel probability-panel">${title(`G${gi()+1} · 本局BP推导概率`,'<span class="pill amber">规则估算 · 未校准</span>')}<div class="bp-prob-teams"><div><b>${m.a}</b><strong>${pct(r.pA)}</strong></div><div><b>${m.b}</b><strong>${pct(r.pB)}</strong></div></div><div class="prob-track" role="img" aria-label="规则推导：${m.a}${pct(r.pA)}，${m.b}${pct(r.pB)}"><i style="width:${r.pA*100}%"></i><i style="width:${r.pB*100}%"></i></div><p class="result-summary">${adv?`当前规则更偏向 <b>${team(adv)}</b> 的阵容结构。`:'当前规则下，两套阵容没有明显结构差距。'}</p><p class="result-caveat">仅在双方执行能力相同的前提下比较BP结构。没有接入队伍实力、选手熟练度、同版本职业赛统计；<b>不是经回测的真实胜率。</b></p>${!r.bansComplete?'<p class="hint amber-text">十名英雄已选齐，但禁用尚未全部记录；这里只评估已选阵容。</p>':''}${mismatches.length?`<p class="hint amber-text">位置不在常见建议中：${mismatches.map(esc).join('；')}。允许非常规选择，但画像不随位置重新训练。</p>`:''}<div class="panel-footer"><span>BO5 · 第${gi()+1}局 · 不换算晋级率</span><button class="text-btn" data-goto="sources" data-source-focus="rule-R04">公式与系数 ↗</button></div></section>
+    <section class="panel">${title('结果由哪些因素推动','<span class="pill">可复算</span>')}<div class="contrib-header"><span>负值偏向 ${m.b}</span><span>正值偏向 ${m.a}</span></div>${r.contributions.map(x=>`<div class="contribution"><span>${x.name}<button class="rule-link" data-goto="sources" data-source-focus="rule-${x.rule}">${x.rule}</button></span><div class="contrib-track"><i class="center"></i><i class="fill ${x.value<0?'negative':''}" style="left:${x.value<0?50-Math.min(49,Math.abs(x.value)*95):50}%;width:${Math.min(49,Math.abs(x.value)*95)}%"></i></div><b class="${x.value>=0?'score-a':'score-b'}">${x.value>=0?'+':''}${x.value.toFixed(3)}</b></div>`).join('')}<p class="hint">条形是对logit的规则贡献，不是“胜率增加几个百分点”。总和 z=${r.z.toFixed(4)}，通过sigmoid转换。</p></section>
+    <section class="panel composition-panel">${title('两套阵容怎么打','<span class="pill amber">规则解读</span>')}<div class="two">${['a','b'].map(side=>teamInterpretation(side,r[side.toUpperCase()])).join('')}</div><details class="profile-details"><summary>查看本局英雄画像与数字来源</summary><p class="hint">以下数值均为R01手工画像（0—3），不是官方评分或版本胜率。装备、符文与具体技能克制未完整建模。</p><div class="profile-table-wrap"><table class="profile-table"><thead><tr><th>英雄 / 位置</th>${['前排','开团','保护','输出','清线','前期','后期','射程','边线'].map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${M.picks(game()).map(p=>{const c=C.byId[p.id];return `<tr><td>${team(p.side)} · ${esc(c.name)}<small>${C.roles[p.role]}</small></td>${['front','engage','peel','dps','wave','early','late','range','split'].map(k=>`<td>${c.profile[k]}</td>`).join('')}</tr>`;}).join('')}</tbody></table></div></details></section>`;
+  }
+  function teamInterpretation(side,p){const warnings=[];if(p.front<.5)warnings.push('前排承压不足，正面持续接团更依赖走位与先手。');if(p.engage<.5)warnings.push('主动开团不足，需要对方进入射程或依靠抓单。');if(p.peel<.5&&p.dps>.65)warnings.push('持续输出充足，但核心输出的保护不够。');if(p.wave<.6)warnings.push('清线能力偏弱，守塔与转线容易承担压力。');if(p.ad>.8||p.ad<.2)warnings.push('伤害类型偏单一，对手防装选择更集中。');const good=p.engage>=.8?'可主动开团，重点是前后排能否同时跟进。':p.range>=.75?'有远程施压条件，优先保持距离与资源入口控制。':p.late>=.75?'后期输出画像较强，前期需要减少无效接团。':'以阵型完整和关键资源前的站位为主。';return `<article class="team-readout"><h3 class="score-${side}">${team(side)}</h3><p>${good}</p><div class="composition-bars">${[['front','前排'],['engage','先手'],['peel','保护'],['dps','持续输出']].map(([k,n])=>`<div><span>${n}</span><i><em class="${side}" style="width:${p[k]*100}%"></em></i><small>${Math.round(p[k]*100)}</small></div>`).join('')}</div>${warnings.length?warnings.slice(0,3).map(w=>`<p class="team-warning">${w}</p>`).join(''):'<p class="team-warning neutral">这些规则未发现明显结构短板，不等于无克制或必胜。</p>'}<p class="hint">来源：<button class="text-btn" data-goto="sources" data-source-focus="rule-R03">R01—R03手工规则</button></p></article>`;}
+  function bp(){const g=game(),conflicts=M.issues(ms(),gi()),totalConflicts=ms().games.map((g,i)=>M.issues(ms(),i).length?`G${i+1}`:null).filter(Boolean);return head('BP演算','选一场、逐局禁选英雄，再看本局阵容推导。每场五局单独保存。','DRAFT DESK / GAME BY GAME')+matchCards()+gameTabs()+
+    `<section class="draft-controls"><div class="current-game"><span class="game-number">G${gi()+1}</span><div><strong>${match().a} <span>vs</span> ${match().b}</strong><small>BO5 · ${gi()===0?'首局BP':'全局BP承接前局'}</small></div></div><div class="draft-selects"><label>先选队<select id="first-pick"><option value="a" ${g.firstPick==='a'?'selected':''}>${match().a}</option><option value="b" ${g.firstPick==='b'?'selected':''}>${match().b}</option></select></label><label>地图蓝色方<select id="blue-side"><option value="a" ${g.blue==='a'?'selected':''}>${match().a}</option><option value="b" ${g.blue==='b'?'selected':''}>${match().b}</option></select></label></div><div class="draft-actions"><button class="btn small ghost" id="undo-bp" ${(ui.undo[undoKey()]||[]).length?'':'disabled'}>${icon('undo')}撤销</button><button class="btn small ghost" id="clear-slot" ${currentStep()>=0&&g.actions[currentStep()]?'':'disabled'}>清空槽位</button><button class="btn small ghost danger" id="reset-game">重置本局</button></div></section>
+    ${totalConflicts.length?notice(`${totalConflicts.join('、')}存在前后局英雄冲突。记录已保留，请修正；冲突局不会输出概率。`,'amber'):''}
+    <div class="draft-board">${teamBoard('a')}${poolHTML()}${teamBoard('b')}</div>
+    <section class="lock-panel">${lockHTML()}</section>
+    <div class="bp-analysis" id="bp-analysis">${analysisHTML()}</div>
+    <section class="panel section-gap">${title(`G${gi()+1} · 本局笔记`,'<span class="pill">独立保存</span>')}<label class="sr-only" for="game-note">本局BP笔记</label><textarea id="game-note" maxlength="12000" placeholder="记录关键反制位、资源重心、选手熟练度与尚未纳入模型的判断……">${esc(g.note)}</textarea><p class="hint">候选库用于模拟，不等于官方赛事可用名单。赛事禁用名单尚未接入；位置与画像为作者规则。<button class="text-btn" data-goto="sources">查看出处与边界 ↗</button></p></section>`+foot();}
+  function version(){return head('版本分析','官方改动与阵容解读分开显示；加强或削弱不直接换算成胜率。','PATCH 26.20 / META ANALYSIS')+
+    `<div class="version-intro"><section><span>01 / 上路</span><h2>盲选成本与边线职责</h2><p>奎桑提削弱、上路传送调整。选人时同时看抗压、边线与正面职责，不把“选战士”当作版本答案。</p>${ref('patch20','26.20公告 ↗')} · ${ref('patch19','26.19公告 ↗')}</section><section><span>02 / 中野</span><h2>输出位增加，职责要补齐</h2><p>千珏、莉莉娅获得加强。转向输出型打野时，开团、承伤与保护是否由其他位置补齐，是BP要检查的问题。</p>${ref('patch20','26.20公告 ↗')}</section><section><span>03 / 下路</span><h2>线权与发育都需要条件</h2><p>寒冰削弱、卢锡安加强，不等于所有后期阵容失效。先看前期代价与输出环境，再谈版本适配。</p>${ref('patch20','26.20公告 ↗')}</section></div>`+
+    notice('下方数值摘自版本公告；上方战术含义属于分析推断。本页不是英雄强度榜，也没有完整逐场BP统计。')+
+    `<div class="section-title"><h2>关键改动</h2><small>部分条目 · 26.20与26.19联动</small></div><div class="tabs-inline">${['全部','上路','打野','下路','系统'].map(x=>`<button class="chip ${state.filter===x?'active':''}" data-filter="${x}">${x}</button>`).join('')}</div><div class="patch-grid">${D.patches.filter(p=>state.filter==='全部'||p.role===state.filter).map(p=>`<article class="patch-card"><div class="patch-head"><div class="patch-name"><span class="role-icon">${p.role.slice(0,1)}</span><h3>${p.champ}</h3></div><span class="pill ${p.tag==='加强'?'green':p.tag==='削弱'?'amber':'blue'}">${p.tag}</span></div><p class="patch-fact">${p.fact}</p><div class="patch-question"><b>BP分析切入点 · 非统计结论</b>${p.question}</div><div class="patch-source"><span>PATCH ${p.patch} · ${p.role}</span>${ref(p.source,'官方公告 ↗')}</div></article>`).join('')}</div>
+    <section class="panel section-gap">${title('版本如何进入BP演算')}<div class="readme"><p>BP页目前比较阵容结构，不会因为某英雄在公告中“加强”就自动加胜率。版本强度、选手熟练度与实际对线数据仍未接入，避免把不同证据重复计分。</p><p>当前选中的对阵：${match().a} vs ${match().b}。版本笔记可留在本场或对应小局，不影响其他对阵。</p></div><div class="data-actions"><button class="btn primary" data-goto="bp">回到本场BP ${icon('arrow')}</button></div></section>`+foot();}
+  function sources(){return head('每个结论，都有出处','赛果、版本事实、手工规则与计算结果分别标记，不互相冒充。','SOURCES / EVIDENCE & RULES')+
+    `<div class="sources-grid"><section class="panel">${title('赛事与版本来源','<span class="pill">静态资料</span>')}${D.sources.map(s=>`<article class="source-item"><div class="source-top"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ${icon('arrow')}</a><span class="pill">${s.type}</span></div><p>${esc(s.scope)}</p></article>`).join('')}<article class="source-item"><div class="source-top"><a href="${C.source}" target="_blank" rel="noopener noreferrer">Riot · 英雄目录 ${icon('arrow')}</a><span class="pill">英雄身份</span></div><p>本地候选库${C.list.length}名英雄；位置、分类和0—3画像是作者规则，不来自官方统计。${C.list.filter(c=>!c.profile).map(c=>c.name).join('、')}画像暂缺，选入阵容时暂停概率输出。</p></article><article class="source-item"><a href="https://developer.riotgames.com/docs/lol#data-dragon" target="_blank" rel="noopener noreferrer">Riot Data Dragon · 英雄头像资源 ${icon('arrow')}</a><p>头像默认显示；此启动版尚未预装全部图片，首次需要联网。成功获取后保存到浏览器，全部齐全即可在BP页导出内嵌头像的离线HTML；离线版不再请求图片服务器。图片版本16.21.1仅用于头像，不改动26.20赛事资料或计算规则，也不代表英雄获准参赛。加载失败明确显示名称占位，不影响禁选。</p></article></section>
+    <div class="stack"><section class="panel">${title('事实、规则、推导')}<div class="source-kind"><span class="pill green">事实</span><p>赛程与版本条目有外部原始来源。首页把BO1、BO3、BO5分别列出，不混算战力。</p></div><div class="source-kind"><span class="pill amber">作者规则</span><p>英雄画像与模型系数均未训练、未校准。官方英雄页面不为这些数字背书。</p></div><div class="source-kind"><span class="pill blue">计算</span><p>BP完成后按R01—R06推导本局数值。公式可复算，不代表能准确预测比赛，也不输出系列赛晋级率。</p></div></section>
+    <section class="panel">${title('尚未接入')}<div class="missing-list">${['同版本职业赛的历史训练与样本外校准','选手英雄池、熟练度与队伍实力','完整对线克制、装备及符文差异','官方赛事临时禁用英雄名单','参考视频字幕与作者原话'].map(x=>`<div class="missing-item"><span class="missing-name">${x}</span><span>未接入</span></div>`).join('')}</div></section>
+    <section class="panel">${title('工作区与导出','<span class="pill">离线可用</span>')}<p class="readme">四场比赛各五局BP、位置和笔记保存在此浏览器。JSON可备份恢复；报告保留每局阵容、计算规则与出处。</p><div class="data-actions"><button class="btn primary" id="export-json">${icon('download')} 导出JSON</button><button class="btn" id="export-md">导出报告</button><button class="btn" id="import-json">${icon('upload')} 导入JSON</button></div>${state.archivedV1?'<p class="hint">已保留旧版工作区归档；原评分与单局概率不会进入新BP结果。</p>':''}<div class="divider"></div><button class="btn small ghost danger" id="reset-all">清空个人工作区</button><p class="hint">不同设备不会自动同步。下载后用Chrome或Edge打开；浏览器清理缓存前请导出备份。</p></section></div></div>
+    <section class="panel section-gap" id="rules">${title('BP演算的完整规则','<span class="pill amber">非统计模型</span>')}<p class="readme">这些规则是本版实现的一部分，来源为作者手工设计。它们不是从瑞士轮胜率或市场赔率反推的，也没有用BO1、BO3样本冒充BO5模型。</p><div class="rule-grid">${M.RULES.map(r=>`<article class="rule-card" id="rule-${r.id}"><span>${r.id}</span><h3>${r.name}</h3><p>${r.text}</p></article>`).join('')}</div><div class="model-formula">p(A) = 1 / (1 + exp(−z))<br>p(B) = 1 − p(A)<br>默认队伍先验：相同执行能力；未加入球队强弱或选边修正。</div><p class="hint">只在十人阵容完整、位置齐全、前局BP完成且不存在跨局冲突时计算。未设统计置信区间；显示整数百分比不意味着精确到1%。</p></section>
+    <section class="panel section-gap">${title('参考视频笔记','<span class="pill amber">未取得字幕</span>')}<p class="subtext">保留原视频与本场笔记，不把未知内容归给作者。<a href="${D.videoUrl}" target="_blank" rel="noopener noreferrer">打开参考视频 ↗</a></p><label class="field-label" for="video-notes">${match().a} vs ${match().b} · 时间点 / 原话 / 你的理解</label><textarea id="video-notes" data-note="videoNotes" maxlength="12000" placeholder="填写你核对过的观点与时间点……">${esc(ms().videoNotes)}</textarea></section>
+    <p class="legal-note">八强分析工作台不受Riot Games认可，不代表Riot Games或其相关人员的观点。League of Legends及相关资产属于Riot Games。仅供个人赛事分析，不提供投注或下注功能。</p>`+foot();}
+  function render(){
+    $('navigation').innerHTML=tabs.map(([key,ico,name,n])=>`<button class="${state.tab===key?'active':''}" data-goto="${key}" ${state.tab===key?'aria-current="page"':''} title="${name}">${icon(ico)}<span class="nav-text">${name}</span><span class="tiny">${n}</span></button>`).join('');
+    $('crumb').textContent=tabs.find(t=>t[0]===state.tab)[2];$('timezone').value=state.tz;$('export-top').innerHTML=icon('download')+'导出分析';
+    $('main').innerHTML=({overview,bp,version,sources}[state.tab])();
+    $('save-state').textContent=storageOK?'已保存在此浏览器':'仅本次会话 · 请导出';
+    if(ui.sourceFocus&&state.tab==='sources'){const target=$(ui.sourceFocus);if(target){target.classList.add('rule-highlight');target.scrollIntoView({block:'center'});}ui.sourceFocus=null;}
+  }
+  function go(tab,focus=null){if(!tabs.some(t=>t[0]===tab))return;state.tab=tab;ui.sourceFocus=focus;save();render();if(!focus)window.scrollTo({top:0,behavior:'instant'});}
+  function afterChange(){save();render();}
+  function choose(id){const index=currentStep();if(index<0){toast('请先点击一个BP槽位');return;}try{const reason=M.invalidReason(ms(),gi(),index,id);if(reason)throw Error(reason);remember();M.assign(ms(),gi(),index,id);const next=game().actions.findIndex((v,i)=>i>index&&v===null);ui.step=next>=0?next:null;ui.search='';afterChange();}catch(e){toast(e.message);}}
+  function bindClicks(e){const el=e.target.closest('button');if(!el||el.disabled)return;
+    if(el.dataset.goto){go(el.dataset.goto,el.dataset.sourceFocus||null);return;}
+    if(el.dataset.match){state.selected=el.dataset.match;resetUI();afterChange();return;}
+    if(el.dataset.game!==undefined){ms().game=+el.dataset.game;resetUI();afterChange();return;}
+    if(el.dataset.step!==undefined){ui.step=+el.dataset.step;ui.search='';render();return;}
+    if(el.dataset.champ){choose(el.dataset.champ);return;}
+    if(el.dataset.poolRole!==undefined){ui.role=el.dataset.poolRole;render();return;}
+    if(el.dataset.filter){state.filter=el.dataset.filter;afterChange();return;}
+    switch(el.id){
+      case 'skip-ban':choose('__skip__');break;
+      case 'clear-slot':remember();M.clear(game(),currentStep());afterChange();break;
+      case 'undo-bp':{const stack=ui.undo[undoKey()];if(stack?.length){ms().games[gi()]=stack.pop();ui.step=null;afterChange();}break;}
+      case 'reset-game':if(confirm(`清空${team('a')} vs ${team('b')}的G${gi()+1}禁选、位置和本局笔记？后局保留，并重新检查冲突。`)){remember();ms().games[gi()]=M.defaultGame();resetUI();afterChange();}break;
+      case 'export-json':exportJSON();break;
+      case 'export-md':exportMarkdown();break;
+      case 'import-json':$('import-file').click();break;
+      case 'reset-all':if(confirm('清空四场比赛的全部BP与笔记？建议先导出JSON备份。')){state=defaults();resetUI();ui.undo={};afterChange();toast('个人工作区已清空，内置资料未变。');}break;
+    }
+  }
+  $('navigation').addEventListener('click',bindClicks);$('main').addEventListener('click',bindClicks);
+  $('main').addEventListener('input',e=>{const el=e.target;if(el.id==='champ-search'){ui.search=el.value;$('champ-grid').innerHTML=poolItems();}else if(el.dataset.note){ms()[el.dataset.note]=el.value;save();}else if(el.id==='game-note'){game().note=el.value;save();}});
+  $('main').addEventListener('change',e=>{const el=e.target;
+    if(el.id==='first-pick'){remember();M.changeFirst(game(),el.value);ui.step=null;afterChange();}
+    else if(el.id==='blue-side'){remember();game().blue=el.value;afterChange();}
+    else if(el.dataset.roleSide){if(el.value==='')return;remember();M.changeRole(game(),el.dataset.roleSide,+el.dataset.roleSlot,+el.value);afterChange();}
+    else if(el.id==='available-only'){ui.available=el.checked;$('champ-grid').innerHTML=poolItems();}
+  });
+  function download(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+  function exportJSON(){download('worlds_quarterfinals_bp_workspace.json',JSON.stringify({app:'worlds-quarterfinals-workspace',exportVersion:2,exportedAt:new Date().toISOString(),snapshotDate:D.snapshot,workspace:state,model:{version:C.version,calibrated:false,rules:M.RULES},sourceSnapshot:{matches:D.matches,swiss:D.swiss,patch:D.patch,sources:D.sources}},null,2),'application/json;charset=utf-8');toast('已导出四场比赛、全部逐局BP与笔记。');}
+  function exportMarkdown(){const lines=['# 八强分析工作台','','数据快照：2026-11-01；静态，不自动更新。',`导出：${new Date().toISOString()}`,'','BP概率是手工规则估算，未训练、未校准，不是经验证的真实胜率。BO1/BO3/BO5不混算。',''];
+    for(const m of D.matches){const s=state.matches[m.id];lines.push(`## ${m.a} vs ${m.b}`,`赛制BO5；开赛UTC：${m.start}`,'',s.notes||'未填写系列赛笔记。','');for(const [i,g] of s.games.entries()){const r=M.analyze(s,i);lines.push(`### G${i+1}`,`先选：${m[g.firstPick]}；地图蓝色方：${m[g.blue]}。`);for(const side of ['a','b']){lines.push(`- ${m[side]}选用：${M.entries(g,'pick',side).map(p=>`${p.id?C.byId[p.id]?.name||p.id:'未选'}（${p.role===null?'位置未定':C.roles[p.role]}）`).join('、')}`,`- ${m[side]}禁用：${M.entries(g,'ban',side).map(p=>p.id==='__skip__'?'空Ban':C.byId[p.id]?.name||'未禁').join('、')}`);}lines.push(r.ready?`规则推导概率（未校准）：${m.a} ${pct(r.pA)} / ${m.b} ${pct(r.pB)}；z=${r.z.toFixed(6)}。`:`未输出概率：${r.reasons.join('；')}。`);if(r.ready)lines.push(...r.contributions.map(x=>`- ${x.name}：${x.value.toFixed(6)}；${x.rule}`));lines.push('',g.note||'未填写本局笔记。','');}lines.push('### 视频笔记（非自动转录）',s.videoNotes||'未填写。','');}
+    lines.push('## 计算规则与边界',...M.RULES.flatMap(x=>[`### ${x.id} ${x.name}`,x.text,'']),'## 外部来源',...D.sources.map(s=>`- ${s.name}：${s.url}；${s.scope}`),`- 英雄目录：${C.source}`,`- 参考视频（未读取）：${D.videoUrl}`);download('worlds_quarterfinals_bp_report.md',lines.join('\n'),'text/markdown;charset=utf-8');toast('逐局BP分析报告已导出。');}
+  $('timezone').addEventListener('change',e=>{state.tz=e.target.value;afterChange();});$('export-top').addEventListener('click',exportMarkdown);
+  $('import-file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{if(file.size>2_000_000)throw Error('文件超过2MB');const raw=JSON.parse(await file.text());if(raw.app!=='worlds-quarterfinals-workspace'||![1,2].includes(raw.exportVersion))throw Error('不是本工具的备份文件');const candidate=validate(raw.workspace);if(!confirm('导入将替换当前四场比赛的BP和笔记，内置资料不变。继续？'))return;state=candidate;resetUI();ui.undo={};afterChange();toast(raw.exportVersion===1?'旧版笔记已迁移，旧评分与公式参数仅归档。':'全部BP与笔记已恢复。');}catch(err){toast('导入失败：'+err.message);}finally{e.target.value='';}});
+  window.WorldsDiagnostics={getState:()=>clone(state),validate,analyze:()=>M.analyze(ms(),gi()),model:M,champions:C,version:3,portraitAssets:PortraitAssets.info};
+  document.addEventListener('click',e=>{
+    const button=e.target.closest('button');if(!button)return;
+    if(button.id==='retry-portraits')PortraitAssets.prepare();
+    if(button.id==='export-offline')try{PortraitAssets.exportOffline();toast('已导出头像内嵌的离线网页；BP记录请另用JSON备份。');}catch(err){toast(err.message);}
+  });
+  save();render();if(initialMessage)toast(initialMessage);
+  const portraitObserver=new MutationObserver(()=>{if($('champ-grid')){PortraitAssets.refresh();if(!PortraitAssets.info().running&&!PortraitAssets.info().complete&&!portraitAttempted){portraitAttempted=true;PortraitAssets.prepare();}}});
+  let portraitAttempted=false;
+  portraitObserver.observe($('main'),{childList:true,subtree:false});
+  if(state.tab==='bp'){portraitAttempted=true;PortraitAssets.prepare();}
+})();
+
+</script>
+</body>
+</html>
