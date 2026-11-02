@@ -231,7 +231,7 @@ LeeSin|李青|1|fighter|AD|盲僧 瞎子
 Leona|蕾欧娜|4|engage|AP|女坦 日女
 Lillia|莉莉娅|1|battlemage|AP|小鹿
 Lissandra|丽桑卓|2|control|AP|冰女
-Locke|Locke|2|unknown|AP|洛克
+Locke|洛克|2|unknown|AP|Locke 死灰驱魔师
 Lucian|卢锡安|3|earlyadc|AD|奥巴马 圣枪游侠
 Lulu|璐璐|4|enchanter|AP|露露
 Lux|拉克丝|24|artillery|AP|光辉
@@ -322,7 +322,7 @@ Yone|永恩|02|fighter|MIX|封魔剑魂
 Yorick|约里克|0|fighter|AD|掘墓
 Yunara|芸阿娜|3|carry|AD|芸
 Yuumi|悠米|4|enchanter|AP|猫咪
-Zaahen|Zaahen|01|unknown|AD|亚恒
+Zaahen|萨亨|01|unknown|AD|Zaahen 薩亨
 Zac|扎克|014|tank|AP|生化魔人
 Zed|劫|2|assassin|AD|影流之主
 Zeri|泽丽|3|carry|AD|祖安花火
@@ -377,7 +377,7 @@ Zyra|婕拉|14|control|AP|荆棘之兴`;
 if(typeof module!=='undefined')module.exports=DraftChampions;
 
 </script>
-<script id="portrait-assets" type="application/json">{"schemaVersion":1,"assetVersion":"16.21.1","assets":{}}</script>
+<script id="portrait-assets" type="application/json">{"schemaVersion":1,"assetVersion":"16.20.1","assets":{}}</script>
 <script>
 /* Portrait resources are separate from the competition data and BP heuristics.
  * Never represent a network-backed starter as a fully bundled offline file.
@@ -388,7 +388,7 @@ const PortraitAssets = (() => {
   const ids = DraftChampions.list.map(c => c.id);
   const allowed = new Set(ids);
   const KEY = 'worlds2026_champion_portraits_v1';
-  const VERSION = '16.21.1';
+  const VERSION = '16.20.1';
   const assets = Object.create(null);
   const embedded = Object.create(null);
   const failed = new Set();
@@ -405,8 +405,7 @@ const PortraitAssets = (() => {
   merge(embedded);
   const sources = id => allowed.has(id) ? [
     `https://ddragon.leagueoflegends.com/cdn/${VERSION}/img/champion/${id}.png`,
-    `https://ddragon.leagueoflegends.com/cdn/16.20.1/img/champion/${id}.png`,
-    `https://game.gtimg.cn/images/lol/act/img/champion/${id}.png`
+    `https://ddragon.leagueoflegends.com/cdn/16.21.1/img/champion/${id}.png`
   ] : [];
   function count() { return ids.filter(id => assets[id]).length; }
   function info() {
@@ -420,6 +419,22 @@ const PortraitAssets = (() => {
     catch (_) { storageOK = false; }
   }
   function source(id) { return assets[id] || sources(id)[0] || ''; }
+  // Only fetch portraits that are visible in the current viewport or scrolled grid.
+  // This avoids firing 173 network requests on a mobile BP screen.
+  const visibleObserver = typeof IntersectionObserver !== 'undefined'
+    ? new IntersectionObserver(entries => {
+        for (const entry of entries) if (entry.isIntersecting) {
+          const img=entry.target;
+          visibleObserver.unobserve(img);
+          if (!img.getAttribute('src')) img.src=source(img.dataset.portrait);
+        }
+      }, {rootMargin:'70px'}) : null;
+  function observe() {
+    document.querySelectorAll('img[data-portrait]:not([src])').forEach(img => {
+      if(visibleObserver) visibleObserver.observe(img);
+      else img.src=source(img.dataset.portrait);
+    });
+  }
   function refresh() {
     document.querySelectorAll('img[data-portrait]').forEach(img => {
       const uri = assets[img.dataset.portrait];
@@ -515,7 +530,7 @@ const PortraitAssets = (() => {
     setTimeout(()=>URL.revokeObjectURL(url),1000);
     return body;
   }
-  return {source,sources,info,prepare,refresh,importFiles,exportOffline};
+  return {source,sources,info,prepare,refresh,observe,importFiles,exportOffline};
 })();
 
 </script><script>
@@ -563,14 +578,17 @@ const DraftModel = (() => {
     g.actions[actionIndex]=id;
     if(s.type==='pick'){
       const used=new Set(g.roles[s.side].filter((r,j)=>j!==s.slot&&r!==null));
-      const c=C.byId[id],old=g.roles[s.side][s.slot];
-      if(old===null||used.has(old))g.roles[s.side][s.slot]=c.roles.find(r=>!used.has(r))??[0,1,2,3,4].find(r=>!used.has(r))??null;
+      const c=C.byId[id],previous=g.roles[s.side][s.slot];
+      // Never invent a non-recommended lane just to keep the five slots unique.
+      // Replacement champs keep a previous lane only when that lane is suitable.
+      g.roles[s.side][s.slot]=(previous!==null&&c.roles.includes(previous)&&!used.has(previous))
+        ? previous : (c.roles.find(r=>!used.has(r))??null);
     }
   }
   function clear(g,i){const s=sequence(g.firstPick)[i];g.actions[i]=null;if(s.type==='pick')g.roles[s.side][s.slot]=null;}
   function changeRole(g,side,slot,role){
-    if(!['a','b'].includes(side)||!Number.isInteger(slot)||slot<0||slot>4||!Number.isInteger(role)||role<0||role>4)throw Error('位置无效');
-    const prev=g.roles[side][slot],other=g.roles[side].findIndex((r,i)=>r===role&&i!==slot);
+    if(!['a','b'].includes(side)||!Number.isInteger(slot)||slot<0||slot>4||(role!==null&&(!Number.isInteger(role)||role<0||role>4)))throw Error('位置无效');
+    const prev=g.roles[side][slot],other=role===null?-1:g.roles[side].findIndex((r,i)=>r===role&&i!==slot);
     g.roles[side][slot]=role;if(other>=0)g.roles[side][other]=prev;
   }
   function changeFirst(g,first){
@@ -633,7 +651,7 @@ const DraftModel = (() => {
     const z=contributions.reduce((s,x)=>s+x.value,0);
     return {ready:true,picked:10,pA:SIGMOID(z),pB:SIGMOID(-z),z,A,B,contributions,bansComplete:g.actions.every(x=>x!==null),uncalibrated:true,neutralTeamPrior:true};
   }
-  function gameStatus(match,index){const g=match.games[index],n=picks(g).length,bad=issues(match,index);if(bad.length)return {label:'有冲突',type:'error'};if(!n&&!g.actions.some(Boolean))return {label:'待BP',type:'empty'};const r=analyze(match,index);return {label:r.ready?'阵容已就绪':`${n}/10 已选`,type:r.ready?'ready':'pending'};}
+  function gameStatus(match,index){const g=match.games[index],n=picks(g).length,bad=issues(match,index);if(bad.length){if(bad.every(x=>x.includes('未分配位置')))return {label:'待分配位置',type:'pending'};return {label:'有冲突',type:'error'};}if(!n&&!g.actions.some(Boolean))return {label:'待BP',type:'empty'};const r=analyze(match,index);return {label:r.ready?'阵容已就绪':`${n}/10 已选`,type:r.ready?'ready':'pending'};}
   function formatStats(team,rows){
     const history=rows.filter(r=>r[1]===team||r[2]===team).map(([round,a,b,x,y])=>({round,opponent:a===team?b:a,for:a===team?x:y,against:a===team?y:x,format:Math.max(x,y)===1?'BO1':'BO3'}));
     const result={history};for(const format of ['BO1','BO3','BO5']){const h=history.filter(r=>r.format===format);result[format]={series:h.length,w:h.filter(r=>r.for>r.against).length,l:h.filter(r=>r.for<r.against).length,mw:h.reduce((s,r)=>s+r.for,0),ml:h.reduce((s,r)=>s+r.against,0)};}result.w=history.filter(r=>r.for>r.against).length;result.l=history.length-result.w;return result;
@@ -723,12 +741,12 @@ if(typeof module!=='undefined')module.exports=DraftModel;
   function remember(){const k=undoKey();ui.undo[k]??=[];ui.undo[k].push(clone(game()));if(ui.undo[k].length>35)ui.undo[k].shift();}
   function portrait(c,cls=''){
     if(!c)return '<span class="avatar empty-avatar">＋</span>';
-    return `<span class="avatar ${cls} dmg-${c.damage.toLowerCase()}" title="${esc(c.name)}"><span aria-hidden="true">${esc(c.name.slice(0,2))}</span><img src="${PortraitAssets.source(c.id)}" data-portrait="${c.id}" alt="${esc(c.name)}" width="96" height="96" decoding="async" referrerpolicy="no-referrer"></span>`;
+    return `<span class="avatar ${cls} dmg-${c.damage.toLowerCase()}" title="${esc(c.name)}"><span aria-hidden="true">${esc(c.name.slice(0,2))}</span><img loading="lazy" data-portrait="${c.id}" alt="${esc(c.name)}" width="96" height="96" decoding="async" referrerpolicy="no-referrer"></span>`;
   }
   function portraitStatusHTML(){
     const p=PortraitAssets.info();
-    const text=p.embedded===p.total?'全部头像已内嵌 · 离线可用':p.complete?'头像已缓存 · 可导出离线版':p.running?`正在准备离线头像 ${p.available}/${p.total}`:`初次需联网准备头像 ${p.available}/${p.total}`;
-    return `<span class="portrait-state ${p.complete?'ready':''}" id="portrait-state" role="status">${text}</span><button type="button" class="text-btn" id="retry-portraits" ${p.running||p.complete?'hidden':''}>重试</button><button type="button" class="text-btn" id="export-offline" ${p.complete?'':'disabled'} title="头像齐全后，导出所有图片直接内嵌的单文件网页">导出离线版</button>`;
+    const text=p.embedded===p.total?'全部头像已内嵌 · 离线可用':p.complete?'头像已缓存 · 可导出离线版':p.running?`正在缓存离线头像 ${p.available}/${p.total}`:`官方头像在线显示 · 离线缓存 ${p.available}/${p.total}`;
+    return `<span class="portrait-state ${p.complete?'ready':''}" id="portrait-state" role="status">${text}</span><button type="button" class="text-btn" id="retry-portraits" ${p.running||p.complete?'hidden':''}>缓存头像（可选）</button><button type="button" class="text-btn" id="export-offline" ${p.complete?'':'disabled'} title="头像齐全后，导出所有图片直接内嵌的单文件网页">导出离线版</button>`;
   }
   function updatePortraitStatus(){
     const box=$('portrait-status');if(box)box.innerHTML=portraitStatusHTML();
@@ -752,20 +770,20 @@ if(typeof module!=='undefined')module.exports=DraftModel;
     <section class="panel composition-panel">${title('两套阵容怎么打','<span class="pill amber">规则解读</span>')}<div class="two">${['a','b'].map(side=>teamInterpretation(side,r[side.toUpperCase()])).join('')}</div><details class="profile-details"><summary>查看本局英雄画像与数字来源</summary><p class="hint">以下数值均为R01手工画像（0—3），不是官方评分或版本胜率。装备、符文与具体技能克制未完整建模。</p><div class="profile-table-wrap"><table class="profile-table"><thead><tr><th>英雄 / 位置</th>${['前排','开团','保护','输出','清线','前期','后期','射程','边线'].map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${M.picks(game()).map(p=>{const c=C.byId[p.id];return `<tr><td>${team(p.side)} · ${esc(c.name)}<small>${C.roles[p.role]}</small></td>${['front','engage','peel','dps','wave','early','late','range','split'].map(k=>`<td>${c.profile[k]}</td>`).join('')}</tr>`;}).join('')}</tbody></table></div></details></section>`;
   }
   function teamInterpretation(side,p){const warnings=[];if(p.front<.5)warnings.push('前排承压不足，正面持续接团更依赖走位与先手。');if(p.engage<.5)warnings.push('主动开团不足，需要对方进入射程或依靠抓单。');if(p.peel<.5&&p.dps>.65)warnings.push('持续输出充足，但核心输出的保护不够。');if(p.wave<.6)warnings.push('清线能力偏弱，守塔与转线容易承担压力。');if(p.ad>.8||p.ad<.2)warnings.push('伤害类型偏单一，对手防装选择更集中。');const good=p.engage>=.8?'可主动开团，重点是前后排能否同时跟进。':p.range>=.75?'有远程施压条件，优先保持距离与资源入口控制。':p.late>=.75?'后期输出画像较强，前期需要减少无效接团。':'以阵型完整和关键资源前的站位为主。';return `<article class="team-readout"><h3 class="score-${side}">${team(side)}</h3><p>${good}</p><div class="composition-bars">${[['front','前排'],['engage','先手'],['peel','保护'],['dps','持续输出']].map(([k,n])=>`<div><span>${n}</span><i><em class="${side}" style="width:${p[k]*100}%"></em></i><small>${Math.round(p[k]*100)}</small></div>`).join('')}</div>${warnings.length?warnings.slice(0,3).map(w=>`<p class="team-warning">${w}</p>`).join(''):'<p class="team-warning neutral">这些规则未发现明显结构短板，不等于无克制或必胜。</p>'}<p class="hint">来源：<button class="text-btn" data-goto="sources" data-source-focus="rule-R03">R01—R03手工规则</button></p></article>`;}
-  function bp(){const g=game(),conflicts=M.issues(ms(),gi()),totalConflicts=ms().games.map((g,i)=>M.issues(ms(),i).length?`G${i+1}`:null).filter(Boolean);return head('BP演算','选一场、逐局禁选英雄，再看本局阵容推导。每场五局单独保存。','DRAFT DESK / GAME BY GAME')+matchCards()+gameTabs()+
+  function bp(){const g=game(),conflicts=M.issues(ms(),gi()),totalConflicts=ms().games.map((g,i)=>M.issues(ms(),i).some(x=>!x.includes('未分配位置'))?`G${i+1}`:null).filter(Boolean);return head('BP演算','选一场、逐局禁选英雄，再看本局阵容推导。每场五局单独保存。','DRAFT DESK / GAME BY GAME')+matchCards()+gameTabs()+
     `<section class="draft-controls"><div class="current-game"><span class="game-number">G${gi()+1}</span><div><strong>${match().a} <span>vs</span> ${match().b}</strong><small>BO5 · ${gi()===0?'首局BP':'全局BP承接前局'}</small></div></div><div class="draft-selects"><label>先选队<select id="first-pick"><option value="a" ${g.firstPick==='a'?'selected':''}>${match().a}</option><option value="b" ${g.firstPick==='b'?'selected':''}>${match().b}</option></select></label><label>地图蓝色方<select id="blue-side"><option value="a" ${g.blue==='a'?'selected':''}>${match().a}</option><option value="b" ${g.blue==='b'?'selected':''}>${match().b}</option></select></label></div><div class="draft-actions"><button class="btn small ghost" id="undo-bp" ${(ui.undo[undoKey()]||[]).length?'':'disabled'}>${icon('undo')}撤销</button><button class="btn small ghost" id="clear-slot" ${currentStep()>=0&&g.actions[currentStep()]?'':'disabled'}>清空槽位</button><button class="btn small ghost danger" id="reset-game">重置本局</button></div></section>
     ${totalConflicts.length?notice(`${totalConflicts.join('、')}存在前后局英雄冲突。记录已保留，请修正；冲突局不会输出概率。`,'amber'):''}
     <div class="draft-board">${teamBoard('a')}${poolHTML()}${teamBoard('b')}</div>
     <section class="lock-panel">${lockHTML()}</section>
     <div class="bp-analysis" id="bp-analysis">${analysisHTML()}</div>
-    <section class="panel section-gap">${title(`G${gi()+1} · 本局笔记`,'<span class="pill">独立保存</span>')}<label class="sr-only" for="game-note">本局BP笔记</label><textarea id="game-note" maxlength="12000" placeholder="记录关键反制位、资源重心、选手熟练度与尚未纳入模型的判断……">${esc(g.note)}</textarea><p class="hint">候选库用于模拟，不等于官方赛事可用名单。赛事禁用名单尚未接入；位置与画像为作者规则。<button class="text-btn" data-goto="sources">查看出处与边界 ↗</button></p></section>`+foot();}
+    <section class="panel section-gap">${title(`G${gi()+1} · 本局笔记`,'<span class="pill">独立保存</span>')}<label class="sr-only" for="game-note">本局BP笔记</label><textarea id="game-note" maxlength="12000" placeholder="记录关键反制位、资源重心、选手熟练度与尚未纳入模型的判断……">${esc(g.note)}</textarea><p class="hint">位置自动分配仅使用英雄常见位置，无法确定则留空供你手动指定；调整位置不改变已选英雄。候选库用于模拟，不等于官方赛事可用名单。赛事禁用名单尚未接入；位置与画像为作者规则。<button class="text-btn" data-goto="sources">查看出处与边界 ↗</button></p></section>`+foot();}
   function version(){return head('版本分析','官方改动与阵容解读分开显示；加强或削弱不直接换算成胜率。','PATCH 26.20 / META ANALYSIS')+
     `<div class="version-intro"><section><span>01 / 上路</span><h2>盲选成本与边线职责</h2><p>奎桑提削弱、上路传送调整。选人时同时看抗压、边线与正面职责，不把“选战士”当作版本答案。</p>${ref('patch20','26.20公告 ↗')} · ${ref('patch19','26.19公告 ↗')}</section><section><span>02 / 中野</span><h2>输出位增加，职责要补齐</h2><p>千珏、莉莉娅获得加强。转向输出型打野时，开团、承伤与保护是否由其他位置补齐，是BP要检查的问题。</p>${ref('patch20','26.20公告 ↗')}</section><section><span>03 / 下路</span><h2>线权与发育都需要条件</h2><p>寒冰削弱、卢锡安加强，不等于所有后期阵容失效。先看前期代价与输出环境，再谈版本适配。</p>${ref('patch20','26.20公告 ↗')}</section></div>`+
     notice('下方数值摘自版本公告；上方战术含义属于分析推断。本页不是英雄强度榜，也没有完整逐场BP统计。')+
     `<div class="section-title"><h2>关键改动</h2><small>部分条目 · 26.20与26.19联动</small></div><div class="tabs-inline">${['全部','上路','打野','下路','系统'].map(x=>`<button class="chip ${state.filter===x?'active':''}" data-filter="${x}">${x}</button>`).join('')}</div><div class="patch-grid">${D.patches.filter(p=>state.filter==='全部'||p.role===state.filter).map(p=>`<article class="patch-card"><div class="patch-head"><div class="patch-name"><span class="role-icon">${p.role.slice(0,1)}</span><h3>${p.champ}</h3></div><span class="pill ${p.tag==='加强'?'green':p.tag==='削弱'?'amber':'blue'}">${p.tag}</span></div><p class="patch-fact">${p.fact}</p><div class="patch-question"><b>BP分析切入点 · 非统计结论</b>${p.question}</div><div class="patch-source"><span>PATCH ${p.patch} · ${p.role}</span>${ref(p.source,'官方公告 ↗')}</div></article>`).join('')}</div>
     <section class="panel section-gap">${title('版本如何进入BP演算')}<div class="readme"><p>BP页目前比较阵容结构，不会因为某英雄在公告中“加强”就自动加胜率。版本强度、选手熟练度与实际对线数据仍未接入，避免把不同证据重复计分。</p><p>当前选中的对阵：${match().a} vs ${match().b}。版本笔记可留在本场或对应小局，不影响其他对阵。</p></div><div class="data-actions"><button class="btn primary" data-goto="bp">回到本场BP ${icon('arrow')}</button></div></section>`+foot();}
   function sources(){return head('每个结论，都有出处','赛果、版本事实、手工规则与计算结果分别标记，不互相冒充。','SOURCES / EVIDENCE & RULES')+
-    `<div class="sources-grid"><section class="panel">${title('赛事与版本来源','<span class="pill">静态资料</span>')}${D.sources.map(s=>`<article class="source-item"><div class="source-top"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ${icon('arrow')}</a><span class="pill">${s.type}</span></div><p>${esc(s.scope)}</p></article>`).join('')}<article class="source-item"><div class="source-top"><a href="${C.source}" target="_blank" rel="noopener noreferrer">Riot · 英雄目录 ${icon('arrow')}</a><span class="pill">英雄身份</span></div><p>本地候选库${C.list.length}名英雄；位置、分类和0—3画像是作者规则，不来自官方统计。${C.list.filter(c=>!c.profile).map(c=>c.name).join('、')}画像暂缺，选入阵容时暂停概率输出。</p></article><article class="source-item"><a href="https://developer.riotgames.com/docs/lol#data-dragon" target="_blank" rel="noopener noreferrer">Riot Data Dragon · 英雄头像资源 ${icon('arrow')}</a><p>头像默认显示；此启动版尚未预装全部图片，首次需要联网。成功获取后保存到浏览器，全部齐全即可在BP页导出内嵌头像的离线HTML；离线版不再请求图片服务器。图片版本16.21.1仅用于头像，不改动26.20赛事资料或计算规则，也不代表英雄获准参赛。加载失败明确显示名称占位，不影响禁选。</p></article></section>
+    `<div class="sources-grid"><section class="panel">${title('赛事与版本来源','<span class="pill">静态资料</span>')}${D.sources.map(s=>`<article class="source-item"><div class="source-top"><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ${icon('arrow')}</a><span class="pill">${s.type}</span></div><p>${esc(s.scope)}</p></article>`).join('')}<article class="source-item"><div class="source-top"><a href="${C.source}" target="_blank" rel="noopener noreferrer">Riot · 英雄目录 ${icon('arrow')}</a><span class="pill">英雄身份</span></div><p>本地候选库${C.list.length}名英雄；位置、分类和0—3画像是作者规则，不来自官方统计。${C.list.filter(c=>!c.profile).map(c=>c.name).join('、')}画像暂缺，选入阵容时暂停概率输出。</p></article><article class="source-item"><a href="https://developer.riotgames.com/docs/lol#data-dragon" target="_blank" rel="noopener noreferrer">Riot Data Dragon · 英雄头像资源 ${icon('arrow')}</a><p>头像默认显示；此启动版尚未预装全部图片，首次需要联网。成功获取后保存到浏览器，全部齐全即可在BP页导出内嵌头像的离线HTML；离线版不再请求图片服务器。图片版本16.20.1仅用于头像，不改动26.20赛事资料或计算规则，也不代表英雄获准参赛。加载失败明确显示名称占位，不影响禁选。</p></article></section>
     <div class="stack"><section class="panel">${title('事实、规则、推导')}<div class="source-kind"><span class="pill green">事实</span><p>赛程与版本条目有外部原始来源。首页把BO1、BO3、BO5分别列出，不混算战力。</p></div><div class="source-kind"><span class="pill amber">作者规则</span><p>英雄画像与模型系数均未训练、未校准。官方英雄页面不为这些数字背书。</p></div><div class="source-kind"><span class="pill blue">计算</span><p>BP完成后按R01—R06推导本局数值。公式可复算，不代表能准确预测比赛，也不输出系列赛晋级率。</p></div></section>
     <section class="panel">${title('尚未接入')}<div class="missing-list">${['同版本职业赛的历史训练与样本外校准','选手英雄池、熟练度与队伍实力','完整对线克制、装备及符文差异','官方赛事临时禁用英雄名单','参考视频字幕与作者原话'].map(x=>`<div class="missing-item"><span class="missing-name">${x}</span><span>未接入</span></div>`).join('')}</div></section>
     <section class="panel">${title('工作区与导出','<span class="pill">离线可用</span>')}<p class="readme">四场比赛各五局BP、位置和笔记保存在此浏览器。JSON可备份恢复；报告保留每局阵容、计算规则与出处。</p><div class="data-actions"><button class="btn primary" id="export-json">${icon('download')} 导出JSON</button><button class="btn" id="export-md">导出报告</button><button class="btn" id="import-json">${icon('upload')} 导入JSON</button></div>${state.archivedV1?'<p class="hint">已保留旧版工作区归档；原评分与单局概率不会进入新BP结果。</p>':''}<div class="divider"></div><button class="btn small ghost danger" id="reset-all">清空个人工作区</button><p class="hint">不同设备不会自动同步。下载后用Chrome或Edge打开；浏览器清理缓存前请导出备份。</p></section></div></div>
@@ -806,7 +824,7 @@ if(typeof module!=='undefined')module.exports=DraftModel;
   $('main').addEventListener('change',e=>{const el=e.target;
     if(el.id==='first-pick'){remember();M.changeFirst(game(),el.value);ui.step=null;afterChange();}
     else if(el.id==='blue-side'){remember();game().blue=el.value;afterChange();}
-    else if(el.dataset.roleSide){if(el.value==='')return;remember();M.changeRole(game(),el.dataset.roleSide,+el.dataset.roleSlot,+el.value);afterChange();}
+    else if(el.dataset.roleSide){remember();M.changeRole(game(),el.dataset.roleSide,+el.dataset.roleSlot,el.value===''?null:+el.value);afterChange();}
     else if(el.id==='available-only'){ui.available=el.checked;$('champ-grid').innerHTML=poolItems();}
   });
   function download(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);}
@@ -823,10 +841,11 @@ if(typeof module!=='undefined')module.exports=DraftModel;
     if(button.id==='export-offline')try{PortraitAssets.exportOffline();toast('已导出头像内嵌的离线网页；BP记录请另用JSON备份。');}catch(err){toast(err.message);}
   });
   save();render();if(initialMessage)toast(initialMessage);
-  const portraitObserver=new MutationObserver(()=>{if($('champ-grid')){PortraitAssets.refresh();if(!PortraitAssets.info().running&&!PortraitAssets.info().complete&&!portraitAttempted){portraitAttempted=true;PortraitAssets.prepare();}}});
-  let portraitAttempted=false;
-  portraitObserver.observe($('main'),{childList:true,subtree:false});
-  if(state.tab==='bp'){portraitAttempted=true;PortraitAssets.prepare();}
+  // Online portraits load lazily. Bulk download is opt-in to avoid hundreds of
+  // simultaneous mobile requests and unexpected UI redraws during BP.
+  const portraitObserver=new MutationObserver(()=>PortraitAssets.observe());
+  portraitObserver.observe($('main'),{childList:true,subtree:true});
+  PortraitAssets.observe();
 })();
 
 </script>
